@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('datos_productos', function (Blueprint $table) {
+        Schema::create('facturas', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-
-            $table->unsignedBigInteger('id_productos');
- 
-            $table->foreign('id_productos')->references('id')->on('factura');
+            $table->string('factura');
             $table->timestamps();
         });
     }
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('datos_productos');
+        Schema::dropIfExists('facturas');
     }
 };
