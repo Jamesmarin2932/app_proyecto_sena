@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('dato_productos', function (Blueprint $table) {
             $table->id();
             $table->string('codigo');
+            
             $table->unsignedBigInteger('id_factura');
  
              $table->foreign('id_factura')->references('id')->on('facturas');

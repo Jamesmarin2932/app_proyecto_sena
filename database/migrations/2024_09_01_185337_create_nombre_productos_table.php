@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('nombre_productos', function (Blueprint $table) {
             $table->id();
-            $table->string('descripcion');
-            $table->decimal('precio',8 ,2);
+            $table->string('Nombre');
+            $table->text('Descripcion');
+            $table->decimal('Precio', 8,2);
+            $table->string('Stock');
             $table->unsignedBigInteger('id_datos_productos');
  
              $table->foreign('id_datos_productos')->references('id')->on('dato_productos');

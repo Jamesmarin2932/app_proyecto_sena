@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('fecha_de_compra');
             $table->string('producto');
+            $table->string('Cantidad');
             $table->decimal('sub_total', 8, 2);
             $table->decimal('descuento', 8, 2);
             $table->decimal('iva', 8,2);

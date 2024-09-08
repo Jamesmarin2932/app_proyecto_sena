@@ -12,6 +12,7 @@ class FacturaController extends Controller
         return response()->json([
             'status'=>'200',
             'message'=> 'guardado con exito',
+            
         ]
             
         ); }
