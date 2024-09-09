@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('facturas', function (Blueprint $table) {
             $table->id();
-            $table->string('Numero de factura');
-            $table->string('id_dato_cliente');
+            $table->string('Numero_de_factura');
+    
             $table->timestamps();
         });
     }

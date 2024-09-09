@@ -3,11 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Factura;
 
 class FacturaController extends Controller
 {
     //
     public function save (Request $request){
+
+
+
+        $factura=Factura::create([
+            'Numero_de_factura'=> $request->input('Numero_de_factura')
+        ]);
+
+
+
+       // $factura=new Factura();
+       // $factura->Numero_de_factura= $request->Numero_de_factura;
+        //$factura->save();
+      
 
         return response()->json([
             'status'=>'200',
