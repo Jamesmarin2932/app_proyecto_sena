@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class direccion extends Model
 {
     use HasFactory;
+    protected $fillable=['direccion','id_datos_clientes'];
 }

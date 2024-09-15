@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Direccion;
 
 class DireccionController extends Controller
 {
     //
 
     public function save (Request $request){
+
+        $direccion = Direccion::create([
+            'direccion' => $request->direccion,
+            'id_datos_clientes' => $request->id_datos_clientes
+        ]);
+
 
         return response()->json([
             'status'=>'200',

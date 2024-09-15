@@ -3,11 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Ciudad;
 class CiudadController extends Controller
 {
     //
     public function save (Request $request){
+
+          
+        $ciudad = Ciudad::create([
+            'ciudad' => $request->ciudad,
+            'id_datos_clientes' => $request->id_datos_clientes
+        ]);
+
 
         return response()->json([
             'status'=>'200',

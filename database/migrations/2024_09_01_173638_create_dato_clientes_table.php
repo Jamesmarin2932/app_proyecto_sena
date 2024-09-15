@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dato_empleados', function (Blueprint $table) {
+        Schema::create('dato_clientes', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo');
+            $table->string('identificacion');
             $table->string('nombre');
-            
-            $table->unsignedBigInteger('id_factura');
- 
-             $table->foreign('id_factura')->references('id')->on('facturas');
+            $table->string('apellido');
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dato_empleados');
+        Schema::dropIfExists('dato_clientes');
     }
 };

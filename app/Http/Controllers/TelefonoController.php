@@ -3,11 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\telefono;
 
 class TelefonoController extends Controller
 {
     //
     public function save (Request $request){
+
+        
+        $telefono = Telefono::create([
+            'telefono' => $request->telefono,
+            'id_datos_clientes' => $request->id_datos_clientes
+        ]);
+
 
         return response()->json([
             'status'=>'200',

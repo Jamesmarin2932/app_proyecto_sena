@@ -3,11 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Dato_producto;
+use App\Models\Factura;
 
 class DatoProductoController extends Controller
 {
     //
     public function save (Request $request){
+
+
+        $dato_producto = Dato_Producto::create([
+            'codigo' => $request->codigo,
+            'id_factura' => $request->id_factura,
+        ]);
+
 
         return response()->json([
             'status'=>'200',

@@ -3,12 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Dato_cliente;
+
 
 class DatoClienteController extends Controller
 {
     //
 
     public function save (Request $request){
+
+        $dato_cliente=Dato_cliente::create([
+            'identificacion'=> $request->identificacion,
+            'nombre'=> $request->nombre,
+            'apellido'=> $request->apellido,
+
+        ]);
+
+      
 
         return response()->json([
             'status'=>'200',

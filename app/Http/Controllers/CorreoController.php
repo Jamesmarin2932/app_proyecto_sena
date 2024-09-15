@@ -3,11 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Correo;
 
 class CorreoController extends Controller
 {
     //
     public function save (Request $request){
+
+         
+        $correo = Correo::create([
+            'correo' => $request->correo,
+            'id_datos_clientes' => $request->id_datos_clientes
+        ]);
+
+
 
         return response()->json([
             'status'=>'200',

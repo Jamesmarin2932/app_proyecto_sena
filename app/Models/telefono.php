@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class telefono extends Model
 {
     use HasFactory;
+
+    protected $fillable=['telefono','id_datos_clientes'];
 }

@@ -3,12 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Nombre_producto;
 
 class NombreProductoController extends Controller
 {
     //
     public function save (Request $request){
 
+
+        $nombre_producto=Nombre_producto::create([
+
+            'Nombre'=> $request->Nombre,
+            'Descripcion'=> $request->Descripcion,
+            'Precio'=> $request->Precio,
+            'Stock'=> $request->Stock,
+            'id_datos_productos'=> $request->id_datos_productos,
+           
+
+        ]);
+
+
+
+        
+  
         return response()->json([
             'status'=>'200',
             'message'=> 'guardado con exito',

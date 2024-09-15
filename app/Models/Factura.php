@@ -9,6 +9,6 @@ class Factura extends Model
 {
     use HasFactory;
 
-    protected $fillable=['Numero_de_factura'];
+    protected $fillable=['Numero_de_factura','id_cliente'];
 
 }
