@@ -26,32 +26,46 @@ class CiudadController extends Controller
 
         public function update (Request $request){
 
+
+            $ciudad = Ciudad::findOrFail($request->id);
+            $ciudad-> update([
+            'ciudad' => $request->ciudad,
+            'id_datos_clientes' => $request->id_datos_clientes
+
+
+            ]);
+
+
             return response()->json([
                 'status'=>'200',
                 'message'=> 'Actualizado con exito',
             ]
                 
             ); }
-    
 
-            public function getdata(Request $request)
-{
-    return response()->json([
-        'status' => '200',
-        'message' => 'solicitado con éxito',
-    ]);
-}
-
+            public function getData(Request $request)
+            {
+               $ciudad=Ciudad::all();
         
-                public function delete (Request $request){
+                return response()->json([
+                    'status' => '200',
+                    'message' => 'Datos solicitados con éxito',
+                    'data' =>$ciudad,
+                ]);
+            }
 
-                    return response()->json([
-                        'status'=>'200',
-                        'message'=> 'Eliminado con exito',
-                    ] 
-                        
-                    ); }
-            
+            public function delete (Request $request){
+
+                    
+                $ciudad = Telefono::findOrFail($request->id);
+                $ciudad-> delete();
+     
+                         return response()->json([
+                             'status'=>'200',
+                             'message'=> 'Eliminado con exito',
+                         ] 
+                             
+                         ); }
 
                     public function byid (Request $request){
 

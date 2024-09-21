@@ -36,32 +36,49 @@ class NombreProductoController extends Controller
 
         public function update (Request $request){
 
+
+            $nombre_producto = Nombre_producto::findOrFail($request->id);
+            $nombre_producto-> update([
+            'Nombre'=> $request->Nombre,
+            'Descripcion'=> $request->Descripcion,
+            'Precio'=> $request->Precio,
+            'Stock'=> $request->Stock,
+            'id_datos_productos'=> $request->id_datos_productos,
+
+
+            ]);
+
+
             return response()->json([
                 'status'=>'200',
                 'message'=> 'Actualizado con exito',
             ]
                 
             ); }
-    
 
-            public function getdata(Request $request)
-{
-    return response()->json([
-        'status' => '200',
-        'message' => 'solicitado con éxito',
-    ]);
-}
-
+            public function getData(Request $request)
+            {
+               $nombre_producto=Nombre_producto::all();
         
-                public function delete (Request $request){
+                return response()->json([
+                    'status' => '200',
+                    'message' => 'Datos solicitados con éxito',
+                    'data' =>$nombre_producto,
+                ]);
+            }
 
-                    return response()->json([
-                        'status'=>'200',
-                        'message'=> 'Eliminado con exito',
-                    ] 
-                        
-                    ); }
-            
+            public function delete (Request $request){
+
+                    
+                $nombre_producto = Nombre_producto::findOrFail($request->id);
+                $nombre_producto-> delete();
+     
+                         return response()->json([
+                             'status'=>'200',
+                             'message'=> 'Eliminado con exito',
+                         ] 
+                             
+                         ); }
 
                     public function byid (Request $request){
 

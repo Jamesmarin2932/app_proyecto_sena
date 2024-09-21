@@ -33,6 +33,17 @@ class FacturaController extends Controller
         ); }
 
         public function update (Request $request){
+            
+             $factura = Factura::findOrFail($request->id);
+             $factura-> update([
+                'Numero_de_factura'=>$request->Numero_de_factura,
+                'id_cliente'=>$request->id_cliente,
+               
+
+
+            ]);
+
+
 
             return response()->json([
                 'status'=>'200',
@@ -42,38 +53,33 @@ class FacturaController extends Controller
             ); }
     
 
-            public function getdata(Request $request)
+            public function getData(Request $request)
+            
 {
+
+    $facturas =Factura::all();
+
+
     return response()->json([
         'status' => '200',
         'message' => 'solicitado con éxito',
+        'data' => $facturas
     ]);
 }
 
-public function delete(Request $request)
-{
-    // Busca la factura por el número
-    $factura = Factura::where('Numero_de_factura', $request->Numero_de_factura)->first();
+public function delete (Request $request){
+
+                    
+    $factura = Factura::findOrFail($request->id);
+    $factura-> delete();
+
+            return response()->json([
+                'status'=>'200',
+                'message'=> 'Eliminado con exito',
+            ] 
+                
+            ); }
     
-    // Verifica si la factura existe
-    if ($factura) {
-        // Elimina la factura
-        $factura->delete();
-
-        // Retorna una respuesta de éxito
-        return response()->json([
-            'status' => '200',
-            'message' => 'Eliminado con éxito',
-        ]);
-    } else {
-        // Si la factura no existe, retorna un error
-        return response()->json([
-            'status' => '404',
-            'message' => 'Factura no encontrada',
-        ]);
-    }
-}
-
             
 
                     public function byid (Request $request){

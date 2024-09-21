@@ -31,6 +31,17 @@ class DatoClienteController extends Controller
 
         public function update (Request $request){
 
+
+            $dato_cliente = Dato_cliente::findOrFail($request->id);
+            $dato_cliente-> update([
+                'identificacion'=>$request->identificacion,
+                'nombre'=>$request->nombre,
+                'apellido'=>$request->apellido,
+
+
+            ]);
+
+
             return response()->json([
                 'status'=>'200',
                 'message'=> 'Actualizado con exito',
@@ -39,16 +50,23 @@ class DatoClienteController extends Controller
             ); }
     
 
-            public function getdata(Request $request)
-{
-    return response()->json([
-        'status' => '200',
-        'message' => 'solicitado con éxito',
-    ]);
-}
+            public function getData(Request $request)
+            {
+                $clientes = Dato_cliente::all();
+        
+                return response()->json([
+                    'status' => '200',
+                    'message' => 'Datos solicitados con éxito',
+                    'data' => $clientes,
+                ]);
+            }
 
         
                 public function delete (Request $request){
+
+                    
+            $dato_cliente = Dato_cliente::findOrFail($request->id);
+            $dato_cliente-> delete();
 
                     return response()->json([
                         'status'=>'200',

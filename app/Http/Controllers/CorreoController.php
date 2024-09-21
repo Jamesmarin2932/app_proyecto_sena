@@ -28,22 +28,35 @@ class CorreoController extends Controller
 
         public function update (Request $request){
 
+
+             $correo = Correo::findOrFail($request->id);
+             $correo-> update([
+            'correo' => $request->correo,
+            'id_datos_clientes' => $request->id_datos_clientes
+
+
+            ]);
+
+
             return response()->json([
                 'status'=>'200',
                 'message'=> 'Actualizado con exito',
             ]
                 
             ); }
+
     
 
-            public function getdata(Request $request)
-{
-    return response()->json([
-        'status' => '200',
-        'message' => 'solicitado con éxito',
-    ]);
-}
-
+            public function getData(Request $request)
+            {
+               $correo=Correo::all();
+        
+                return response()->json([
+                    'status' => '200',
+                    'message' => 'Datos solicitados con éxito',
+                    'data' =>$correo,
+                ]);
+            }
         
                 public function delete (Request $request){
 

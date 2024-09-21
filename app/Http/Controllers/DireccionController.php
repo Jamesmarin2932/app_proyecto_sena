@@ -27,32 +27,47 @@ class DireccionController extends Controller
 
         public function update (Request $request){
 
+
+          $direccion = Direccion::findOrFail($request->id);
+          $direccion-> update([
+            'direccion' => $request->direccion,
+            'id_datos_clientes' => $request->id_datos_clientes
+
+
+            ]);
+
+
             return response()->json([
                 'status'=>'200',
                 'message'=> 'Actualizado con exito',
             ]
                 
             ); }
+
     
-
-            public function getdata(Request $request)
-{
-    return response()->json([
-        'status' => '200',
-        'message' => 'solicitado con éxito',
-    ]);
-}
-
+            public function getData(Request $request)
+            {
+                $direccion=Direccion::all();
         
-                public function delete (Request $request){
+                return response()->json([
+                    'status' => '200',
+                    'message' => 'Datos solicitados con éxito',
+                    'data' => $direccion,
+                ]);
+            }
+        
+            public function delete (Request $request){
 
-                    return response()->json([
-                        'status'=>'200',
-                        'message'=> 'Eliminado con exito',
-                    ] 
-                        
-                    ); }
-            
+                    
+                $direccion = Direccion::findOrFail($request->id);
+                $direccion-> delete();
+     
+                         return response()->json([
+                             'status'=>'200',
+                             'message'=> 'Eliminado con exito',
+                         ] 
+                             
+                         ); }
 
                     public function byid (Request $request){
 

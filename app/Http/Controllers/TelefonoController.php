@@ -27,32 +27,46 @@ class TelefonoController extends Controller
 
         public function update (Request $request){
 
+
+            $telefono = Telefono::findOrFail($request->id);
+            $telefono-> update([
+            'telefono' => $request->telefono,
+            'id_datos_clientes' => $request->id_datos_clientes
+
+
+            ]);
+
+
             return response()->json([
                 'status'=>'200',
                 'message'=> 'Actualizado con exito',
             ]
                 
             ); }
+
     
-
-            public function getdata(Request $request)
-{
-    return response()->json([
-        'status' => '200',
-        'message' => 'solicitado con éxito',
-    ]);
-}
-
+            public function getData(Request $request)
+            {
+               $telefono=Telefono::all();
         
-                public function delete (Request $request){
+                return response()->json([
+                    'status' => '200',
+                    'message' => 'Datos solicitados con éxito',
+                    'data' =>$telefono,
+                ]);
+            }
+            public function delete (Request $request){
 
-                    return response()->json([
-                        'status'=>'200',
-                        'message'=> 'Eliminado con exito',
-                    ] 
-                        
-                    ); }
-            
+                    
+                $telefono = Telefono::findOrFail($request->id);
+                $telefono-> delete();
+     
+                         return response()->json([
+                             'status'=>'200',
+                             'message'=> 'Eliminado con exito',
+                         ] 
+                             
+                         ); }
 
                     public function byid (Request $request){
 
