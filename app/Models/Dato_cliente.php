@@ -11,5 +11,15 @@ class Dato_cliente extends Model
 
     protected $table = 'dato_clientes';
 
-    protected $fillable=['identificacion','nombre','apellido'];
+    protected $fillable=[
+        
+        'tipo_identificacion',
+        'numero_identificacion',
+        'nombres',
+        'apellidos',
+        'direccion',
+        'ciudad',
+        'telefono',
+        'correo'
+    ];
 }

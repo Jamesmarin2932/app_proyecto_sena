@@ -13,17 +13,19 @@ return new class extends Migration
     {
         Schema::create('descripcion_facturas', function (Blueprint $table) {
             $table->id();
-            $table->date('fecha_de_compra');
+            $table->string('tipo_identificacion');
+            $table->string('numero_identificacion');
+            $table->string('cliente');
+            $table->date('fecha');
+            $table->string('codigo_del_producto');
             $table->string('producto');
-            $table->string('cantidad');
-            $table->decimal('sub_total', 8, 2);
-            $table->decimal('descuento', 8, 2);
-            $table->decimal('iva', 8,2);
-            $table->decimal('total', 8,2);
-
-            $table->unsignedBigInteger('id_factura');
- 
-             $table->foreign('id_factura')->references('id')->on('facturas');
+            $table->integer('cantidad');
+            $table->decimal('precio_unitario', 10, 2);
+            $table->decimal('sub_total', 10, 2);
+            $table->decimal('descuento', 10, 2);
+            $table->decimal('iva', 10, 2);
+            $table->decimal('total', 10, 2);
+            $table->string('numero_factura')->unique(); // Nuevo campo para el número de factura
             $table->timestamps();
         });
     }

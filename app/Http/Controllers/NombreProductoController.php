@@ -12,13 +12,12 @@ class NombreProductoController extends Controller
 
 
         $nombre_producto=Nombre_producto::create([
-
-            'Nombre'=> $request->Nombre,
-            'Descripcion'=> $request->Descripcion,
-            'Precio'=> $request->Precio,
-            'Stock'=> $request->Stock,
-            'id_datos_productos'=> $request->id_datos_productos,
-           
+        'Codigo' => $request->codigo,
+        'Nombre' => $request->nombre,
+        'Descripcion' => $request->descripcion,
+        'Precio' => $request->precio,
+        'Stock' => $request->stock,
+            
 
         ]);
 

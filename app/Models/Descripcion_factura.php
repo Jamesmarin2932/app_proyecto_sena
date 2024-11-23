@@ -9,5 +9,19 @@ class Descripcion_factura extends Model
 {
     use HasFactory;
 
-    protected $fillable=['fecha_de_compra','producto','cantidad','sub_total','descuento','iva','total','id_factura'];
+    protected $fillable = [
+        'tipo_identificacion',
+        'numero_identificacion',
+        'cliente',
+        'fecha',
+        'codigo_del_producto',
+        'producto',
+        'cantidad',
+        'precio_unitario',
+        'sub_total',
+        'descuento',
+        'iva',
+        'total',
+        'numero_factura'
+    ];
 }
