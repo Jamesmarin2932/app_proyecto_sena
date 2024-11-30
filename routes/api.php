@@ -36,9 +36,10 @@ Route::put('/factura/update', [FacturaController::class, 'update']);
 Route::delete('/factura/delete', [FacturaController::class, 'delete']);
 
 Route::get('/dato_clientes/getdata', [DatoClienteController::class, 'getdata']);
+Route::get('/dato_clientes/getdataById/{id}', [DatoClienteController::class, 'getDataById']);
 Route::post('/dato_clientes/save', [DatoClienteController::class, 'save']);
-Route::put('/dato_clientes/update', [DatoClienteController::class, 'update']);
-Route::delete('/dato_clientes/delete', [DatoClienteController::class, 'delete']);
+Route::put('/dato_clientes/update/{id}', [DatoClienteController::class, 'update']);
+Route::delete('/dato_clientes/delete/{id}', [DatoClienteController::class, 'delete']);
 
 Route::get('/dato_productos/getdata', [DatoProductoController::class, 'getdata']);
 Route::post('/dato_productos/save', [DatoProductoController::class, 'save']);

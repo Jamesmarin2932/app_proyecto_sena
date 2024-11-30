@@ -27,7 +27,6 @@ class DescripcionFacturaController extends Controller
             'total' => 'required|numeric|min:0',
         ]);
 
-        // Si la validación falla, devolver errores
         if ($validator->fails()) {
             return response()->json([
                 'status' => 400,
@@ -37,25 +36,23 @@ class DescripcionFacturaController extends Controller
         }
 
         try {
-            // Obtener el último número de factura generado
+            
             $lastInvoice = Descripcion_factura::orderBy('created_at', 'desc')->first();
 
-           // Generar un número de factura con el prefijo FV- y un número secuencial
-$secuencia = 1; // Empezamos con la secuencia en 1
+          
+$secuencia = 1; 
 
-// Si ya existen facturas, obtenemos el último número de factura y extraemos la secuencia
+
 if ($lastInvoice) {
-    // Extraemos el número secuencial de la última factura (después de 'FV-')
-    $lastConsecutiveNumber = substr($lastInvoice->numero_factura, 3); // Quitamos el prefijo 'FV-'
     
-    // Aseguramos que el último número es un número válido
+    $lastConsecutiveNumber = substr($lastInvoice->numero_factura, 3); 
+    
     if (is_numeric($lastConsecutiveNumber)) {
-        $secuencia = intval($lastConsecutiveNumber) + 1; // Incrementamos el número secuencial
+        $secuencia = intval($lastConsecutiveNumber) + 1; 
     }
 }
 
-// Generar el nuevo número de factura con el prefijo 'FV-' y el número secuencial
-$numeroFactura = 'FV-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT); // Ejemplo: FV-00001
+$numeroFactura = 'FV-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT); 
 
             // Crear la factura
             $factura = new Descripcion_factura();
@@ -74,14 +71,14 @@ $numeroFactura = 'FV-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT); // Ejemplo: 
             $factura->numero_factura = $numeroFactura; // Asignar el número de factura generado
             $factura->save();
 
-            // Respuesta JSON de éxito
+           
             return response()->json([
                 'status' => 200,
                 'message' => 'Factura guardada con éxito',
-                'data' => $factura, // Puedes devolver la factura completa si lo necesitas
+                'data' => $factura, 
             ], 200);
         } catch (Exception $e) {
-            // Manejo de errores si algo sale mal
+            
             return response()->json([
                 'status' => 500,
                 'message' => 'Hubo un error al guardar la factura',
@@ -94,7 +91,7 @@ $numeroFactura = 'FV-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT); // Ejemplo: 
 
     public function update(Request $request)
     {
-        // Corregido: El nombre de la clase es DescripcionFactura, no Descripcion_factura
+       
         $descripcion_factura = Descripcion_factura::findOrFail($request->id);
         $descripcion_factura->update([
             'fecha' => $request->fecha,
@@ -104,7 +101,7 @@ $numeroFactura = 'FV-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT); // Ejemplo: 
             'descuento' => $request->descuento,
             'iva' => $request->iva,
             'total' => $request->total,
-            'numero_factura' => $request->numero_factura, // Asegúrate de enviar el número de factura también
+            'numero_factura' => $request->numero_factura, 
         ]);
 
         return response()->json([
@@ -115,7 +112,6 @@ $numeroFactura = 'FV-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT); // Ejemplo: 
 
     public function getData(Request $request)
     {
-        // Obtener todas las facturas
         $descripcion_factura = Descripcion_factura::all();
 
         return response()->json([
@@ -139,7 +135,7 @@ $numeroFactura = 'FV-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT); // Ejemplo: 
 
     public function byid(Request $request)
     {
-        // Aquí parece que faltaba alguna lógica específica para este método
+       
         return response()->json([
             'status' => '200',
             'message' => 'Datos obtenidos con éxito',
