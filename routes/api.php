@@ -47,14 +47,18 @@ Route::put('/dato_productos/update', [DatoProductoController::class, 'update']);
 Route::delete('/dato_productos/delete', [DatoProductoController::class, 'delete']);
 
 Route::get('/descripcion_facturas/getdata', [DescripcionFacturaController::class, 'getdata']);
+Route::get('/descripcion_facturas/getdataById/{id}', [DescripcionFacturaController::class, 'byid']);
+
 Route::post('/descripcion_facturas/save', [DescripcionFacturaController::class, 'save']);
-Route::put('/descripcion_facturas/update', [DescripcionFacturaController::class, 'update']);
+Route::put('/descripcion_facturas/update/{id}', [DescripcionFacturaController::class, 'update']);
 Route::delete('/descripcion_facturas/delete', [DescripcionFacturaController::class, 'delete']);
 
-Route::get('/nombre_productos/getdata', [NombreProductoController::class, 'getdata']);
+Route::get('/nombre_productos/getdata', [NombreProductoController::class, 'getData']);
+Route::get('/nombre_productos/getdataById/{id}', [NombreProductoController::class, 'getDataById']); // Añadido para obtener un producto por ID
 Route::post('/nombre_productos/save', [NombreProductoController::class, 'save']);
-Route::put('/nombre_productos/update', [NombreProductoController::class, 'update']);
-Route::delete('/nombre_productos/delete', [NombreProductoController::class, 'delete']);
+Route::put('/nombre_productos/update/{id}', [NombreProductoController::class, 'update']);
+Route::delete('/nombre_productos/delete/{id}', [NombreProductoController::class, 'delete']);
+
 
 Route::get('/telefonos/getdata', [TelefonoController::class, 'getdata']);
 Route::post('/telefonos/save', [TelefonoController::class, 'save']);
