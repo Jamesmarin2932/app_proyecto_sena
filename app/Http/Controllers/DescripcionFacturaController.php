@@ -49,7 +49,7 @@ class DescripcionFacturaController extends Controller
 
             $numeroFactura = 'FV-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT);
 
-            // Crear la factura
+           
             $factura = new Descripcion_factura();
             $factura->tipo_identificacion = $request->tipo_identificacion;
             $factura->numero_identificacion = $request->numero_identificacion;
@@ -80,17 +80,17 @@ class DescripcionFacturaController extends Controller
         }
     }
 
-    // Método para obtener una factura por ID
+    
     public function byid($id)
     {
         try {
-            // Buscar la factura por ID
+            
             $descripcion_factura = Descripcion_factura::findOrFail($id);
 
             return response()->json([
                 'status' => '200',
                 'message' => 'Datos obtenidos con éxito',
-                'data' => $descripcion_factura,  // Retorna la factura
+                'data' => $descripcion_factura,  
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -101,10 +101,8 @@ class DescripcionFacturaController extends Controller
         }
     }
 
-    // Método para actualizar una factura
    public function update(Request $request)
     {
-        // Validar los datos de entrada
         $validator = Validator::make($request->all(), [
             'tipo_identificacion' => 'required|string|max:255',
             'numero_identificacion' => 'required|string|max:255',
@@ -130,10 +128,10 @@ class DescripcionFacturaController extends Controller
         }
 
         try {
-            // Buscar la factura por ID
+            
             $descripcion_factura = Descripcion_factura::findOrFail($request->id);
 
-            // Actualizar la factura con los nuevos datos
+            
             $descripcion_factura->update([
                 'tipo_identificacion' => $request->tipo_identificacion,
                 'numero_identificacion' => $request->numero_identificacion,
@@ -147,13 +145,13 @@ class DescripcionFacturaController extends Controller
                 'descuento' => $request->descuento,
                 'iva' => $request->iva,
                 'total' => $request->total,
-                'numero_factura' => $request->numero_factura,  // Asegúrate de actualizar el número de factura
+                'numero_factura' => $request->numero_factura,  
             ]);
 
             return response()->json([
                 'status' => 200,
                 'message' => 'Factura actualizada con éxito',
-                'data' => $descripcion_factura,  // Retorna la factura actualizada
+                'data' => $descripcion_factura,  
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -165,16 +163,16 @@ class DescripcionFacturaController extends Controller
     }
 
 
-    // Método para obtener todas las facturas
+    
     public function getData(Request $request)
     {
         try {
-            $descripcion_factura = Descripcion_factura::all();  // Obtener todas las facturas
+            $descripcion_factura = Descripcion_factura::all();  
 
             return response()->json([
                 'status' => '200',
                 'message' => 'Datos solicitados con éxito',
-                'data' => $descripcion_factura,  // Retorna las facturas
+                'data' => $descripcion_factura,  
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -185,11 +183,10 @@ class DescripcionFacturaController extends Controller
         }
     }
 
-    // Método para eliminar una factura por ID
     public function delete(Request $request)
     {
         try {
-            // Buscar y eliminar la factura por ID
+            
             $descripcion_factura = Descripcion_factura::findOrFail($request->id);
             $descripcion_factura->delete();
 

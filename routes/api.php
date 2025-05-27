@@ -10,7 +10,11 @@ use App\Http\Controllers\NombreProductoController;
 use App\Http\Controllers\TelefonoController;
 use App\Http\Controllers\CorreoController;
 use App\Http\Controllers\CiudadController;
-use App\Http\Controllers\DireccionController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AsientoController;
+use App\Http\Controllers\CuentaController;
+
 
 
 
@@ -48,7 +52,6 @@ Route::delete('/dato_productos/delete', [DatoProductoController::class, 'delete'
 
 Route::get('/descripcion_facturas/getdata', [DescripcionFacturaController::class, 'getdata']);
 Route::get('/descripcion_facturas/getdataById/{id}', [DescripcionFacturaController::class, 'byid']);
-
 Route::post('/descripcion_facturas/save', [DescripcionFacturaController::class, 'save']);
 Route::put('/descripcion_facturas/update/{id}', [DescripcionFacturaController::class, 'update']);
 Route::delete('/descripcion_facturas/delete', [DescripcionFacturaController::class, 'delete']);
@@ -75,8 +78,21 @@ Route::post('/ciudads/save', [CiudadController::class, 'save']);
 Route::put('/ciudads/update', [CiudadController::class, 'update']);
 Route::delete('/ciudads/delete', [CiudadController::class, 'delete']);
 
-Route::get('/direccions/getdata', [DireccionController::class, 'getdata']);
-Route::post('/direccions/save', [DireccionController::class, 'save']);
-Route::put('/direccions/update', [DireccionController::class, 'update']);
-Route::delete('/direccions/delete', [DireccionController::class, 'delete']);
+
+
+Route::post('/users/register', [UserController::class, 'register']); 
+Route::put('/users/update/{id}', [UserController::class, 'update']);
+Route::get('usuarios', [UserController::class, 'index']); // Listar usuarios
+Route::get('usuarios/{id}', [UserController::class, 'show']); // Obtener un usuario por ID
+Route::delete('usuarios/{id}', [UserController::class, 'destroy']); // Eliminar un usuario
+
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
+
+Route::get('/asientos', [AsientoController::class, 'index']);
+Route::post('/asientos', [AsientoController::class, 'save']);
+Route::get('/asientos/ultimo-consecutivo', [AsientoController::class, 'ultimoConsecutivo']);
+
+Route::apiResource('cuentas', CuentaController::class);
+Route::get('/cuentas-contables', [CuentaController::class, 'index']);
 
