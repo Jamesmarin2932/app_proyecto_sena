@@ -11,29 +11,26 @@ class NombreProductoController extends Controller
    
 public function save(Request $request)
 {
-   
     $request->validate([
-        'Codigo' => 'required|string', 
-        'Nombre' => 'required|string|max:255',
-        'Descripcion' => 'required|string|max:500',
-        'Precio' => 'required|numeric',
-        'Stock' => 'required|integer',
+        'codigo' => 'required|string',
+        'nombre' => 'required|string|max:255',
+        'descripcion' => 'required|string|max:500',
+        'precio' => 'required|numeric',
+        'stock' => 'required|integer',
     ]);
 
-    
     $nombre_producto = NombreProducto::create([
-        'Codigo' => $request->Codigo, 
-        'Nombre' => $request->Nombre, 
-        'Descripcion' => $request->Descripcion, 
-        'Precio' => $request->Precio, 
-        'Stock' => $request->Stock, 
+        'Codigo' => $request->codigo,
+        'Nombre' => $request->nombre,
+        'Descripcion' => $request->descripcion,
+        'Precio' => $request->precio,
+        'Stock' => $request->stock,
     ]);
 
-    
     return response()->json([
         'status' => '200',
         'message' => 'Producto guardado con éxito',
-        'data' => $nombre_producto 
+        'data' => $nombre_producto
     ]);
 }
 
@@ -49,7 +46,7 @@ public function update(Request $request, $id)
         'stock' => 'required|integer', 
     ]);
         
-        $nombre_producto = Nombreproducto::findOrFail($id);
+        $nombre_producto = NombreProducto::findOrFail($id);
 
        
         $nombre_producto->update([
