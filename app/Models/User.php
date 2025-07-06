@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Hash; // Importar el facade Hash
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Traits\HasRoles; // ← Agregado
 
 class User extends Authenticatable
 {
-    use HasApiTokens;
+    use HasApiTokens, HasRoles; // ← Agregado HasRoles
 
     protected $fillable = [
         'nombre_usuario',
@@ -18,14 +19,13 @@ class User extends Authenticatable
     ];
 
     protected $hidden = [
-        'password', // Para no exponer la contraseña
+        'password',
         'remember_token',
     ];
 
     // Mutador para encriptar la contraseña
     public function setPasswordAttribute($value)
     {
-        // Si se proporciona una contraseña, encripta la contraseña
         if (!empty($value)) {
             $this->attributes['password'] = Hash::make($value);
         }

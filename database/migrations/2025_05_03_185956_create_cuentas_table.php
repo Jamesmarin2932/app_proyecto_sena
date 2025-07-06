@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('cuentas', function (Blueprint $table) {
-            $table->id();
-            $table->string('codigo')->unique(); // Ej: "1105"
-            $table->string('nombre'); // Ej: "Caja"
-            $table->decimal('saldo', 15, 2)->default(0);
-            $table->timestamps();
-        });
+    $table->id();
+    $table->string('codigo')->unique();
+    $table->string('nombre');
+    $table->timestamps();
+});
+
     }
 
     /**
