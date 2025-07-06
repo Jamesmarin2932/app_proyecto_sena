@@ -13,14 +13,35 @@ return new class extends Migration
     {
         Schema::create('dato_clientes', function (Blueprint $table) {
             $table->id();
-            $table->string('tipo_identificacion');
-            $table->string('numero_identificacion');
-            $table->string('nombres');
-            $table->string('apellidos');
+
+            // Identificación
+            $table->string('tipo_identificacion'); // CC, NIT, CE, etc.
+            $table->string('numero_identificacion')->unique();
+
+            // Datos personales
+            $table->string('nombres')->nullable(); // Puede ser null si es persona jurídica
+            $table->string('apellidos')->nullable(); // Igual que arriba
+            $table->string('razon_social')->nullable(); // Para personas jurídicas
+
+            // Tipo de persona y tercero
+            $table->enum('tipo_persona', ['natural', 'juridica'])->default('natural');
+            $table->enum('tipo_tercero', ['cliente', 'proveedor', 'ambos'])->default('cliente');
+
+            // Contacto
             $table->string('direccion');
+            $table->string('departamento');
             $table->string('ciudad');
-            $table->string('telefono');
-            $table->string('correo');
+            $table->string('codigo_postal')->nullable();
+            $table->string('pais')->default('Colombia');
+            $table->string('telefono')->nullable();
+            $table->string('correo')->nullable();
+
+            // Otros
+            $table->string('actividad_economica')->nullable();
+            $table->string('observaciones')->nullable();
+            $table->string('cuenta_gasto')->nullable(); // o el tipo que desees
+
+
             $table->timestamps();
         });
     }

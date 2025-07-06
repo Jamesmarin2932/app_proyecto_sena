@@ -3,118 +3,127 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Dato_cliente;
-
+use App\Models\DatoCliente;
 
 class DatoClienteController extends Controller
 {
-    //
+    /**
+     * Guardar un nuevo cliente.
+     */
+    public function save(Request $request)
+    {
+        $validated = $request->validate([
+            'tipo_identificacion'     => 'required|string|max:10',
+            'numero_identificacion'   => 'required|string|max:20|unique:dato_clientes,numero_identificacion',
+            'nombres'                 => 'nullable|string|max:100',
+            'apellidos'               => 'nullable|string|max:100',
+            'razon_social'           => 'nullable|string|max:200',
+            'tipo_persona'           => 'required|in:natural,juridica',
+            'tipo_tercero'           => 'required|in:cliente,proveedor,ambos',
+            'direccion'              => 'required|string|max:255',
+            'departamento'           => 'required|string|max:100',
+            'ciudad'                 => 'required|string|max:100',
+            'codigo_postal'          => 'nullable|string|max:20',
+            'pais'                   => 'required|string|max:100',
+            'telefono'               => 'nullable|string|max:20',
+            'correo'                 => 'nullable|email|max:100',
+            'actividad_economica'    => 'nullable|string|max:255',
+            'observaciones'          => 'nullable|string|max:500',
+            'cuenta_gasto' => 'nullable|string|max:100', // 👈 Aquí también puedes ponerlo como 'required' si deseas
 
-    public function save (Request $request){
-
-        $dato_cliente=Dato_cliente::create([
-
-        'tipo_identificacion' => $request->tipo_identificacion,
-        'numero_identificacion' => $request->numero_identificacion,
-        'nombres' => $request->nombres,
-        'apellidos' => $request->apellidos,
-        'direccion' => $request->direccion,
-        'ciudad' => $request->ciudad,
-        'telefono' => $request->telefono,
-        'correo' => $request->correo,
-        
         ]);
 
-      
+        DatoCliente::create($validated);
 
         return response()->json([
-            'status'=>'200',
-            'message'=> 'guardado con exito',
-            
-        ]
-            
-        ); }
-        public function update(Request $request, $id)
-        {
-            // Buscar el cliente por el ID proporcionado
-            $dato_cliente = Dato_cliente::findOrFail($id);
-        
-            // Actualizar los campos específicos del cliente
-            $dato_cliente->tipo_identificacion = $request->tipo_identificacion;
-            $dato_cliente->numero_identificacion = $request->numero_identificacion;
-            $dato_cliente->nombres = $request->nombres;
-            $dato_cliente->apellidos = $request->apellidos;
-            $dato_cliente->direccion = $request->direccion;
-            $dato_cliente->ciudad = $request->ciudad;
-            $dato_cliente->telefono = $request->telefono;
-            $dato_cliente->correo = $request->correo;
-        
-            // Guardar los cambios en la base de datos
-            $dato_cliente->save();
-        
-            return response()->json([
-                'status' => '200',
-                'message' => 'Cliente actualizado con éxito',
-            ]);
-        }
-        
+            'status' => '200',
+            'message' => 'Guardado con éxito',
+        ]);
+    }
 
-            public function getData(Request $request)
-            {
-                $clientes = Dato_cliente::all();
-        
-                return response()->json([
-                    'status' => '200',
-                    'message' => 'Datos solicitados con éxito',
-                    'data' => $clientes,
-                ]);
-            }
+    /**
+     * Actualizar cliente.
+     */
+    public function update(Request $request, $id)
+    {
+        $dato_cliente = DatoCliente::findOrFail($id);
 
-            public function getDataById($id)
-{
-    try {
-        $clientes = Dato_cliente::findOrFail($id);
-        
+        $validated = $request->validate([
+            'tipo_identificacion'     => 'required|string|max:10',
+            'numero_identificacion'   => 'required|string|max:20|unique:dato_clientes,numero_identificacion,' . $dato_cliente->id,
+            'nombres'                 => 'nullable|string|max:100',
+            'apellidos'               => 'nullable|string|max:100',
+            'razon_social'           => 'nullable|string|max:200',
+            'tipo_persona'           => 'required|in:natural,juridica',
+            'tipo_tercero'           => 'required|in:cliente,proveedor,ambos',
+            'direccion'              => 'required|string|max:255',
+            'departamento'           => 'required|string|max:100',
+            'ciudad'                 => 'required|string|max:100',
+            'codigo_postal'          => 'nullable|string|max:20',
+            'pais'                   => 'required|string|max:100',
+            'telefono'               => 'nullable|string|max:20',
+            'correo'                 => 'nullable|email|max:100',
+            'actividad_economica'    => 'nullable|string|max:255',
+            'observaciones'          => 'nullable|string|max:500',
+            'cuenta_gasto' => 'nullable|string|max:100',
+
+
+        ]);
+
+        $dato_cliente->update($validated);
+
+        return response()->json([
+            'status' => '200',
+            'message' => 'Cliente actualizado con éxito',
+        ]);
+    }
+
+    /**
+     * Obtener todos los clientes.
+     */
+    public function getData()
+    {
+        $clientes = DatoCliente::all();
+
         return response()->json([
             'status' => '200',
             'message' => 'Datos solicitados con éxito',
             'data' => $clientes,
         ]);
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+    }
+
+    /**
+     * Obtener un cliente por ID.
+     */
+    public function getDataById($id)
+    {
+        try {
+            $cliente = DatoCliente::findOrFail($id);
+
+            return response()->json([
+                'status' => '200',
+                'message' => 'Datos solicitados con éxito',
+                'data' => $cliente,
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => '404',
+                'message' => 'Cliente no encontrado',
+            ], 404);
+        }
+    }
+
+    /**
+     * Eliminar cliente.
+     */
+    public function delete($id)
+    {
+        $cliente = DatoCliente::findOrFail($id);
+        $cliente->delete();
+
         return response()->json([
-            'status' => '404',
-            'message' => 'Cliente no encontrado',
-        ], 404);
+            'status' => '200',
+            'message' => 'Eliminado con éxito',
+        ]);
     }
 }
-
-
-
-
-            public function delete($id) {  // Aquí se recibe el parámetro ID de la URL
-                $dato_cliente = Dato_cliente::findOrFail($id);  // Ahora usamos el ID directamente
-                $dato_cliente->delete();
-            
-                return response()->json([
-                    'status' => '200',
-                    'message' => 'Eliminado con éxito',
-                ]);
-            }
-            
-            
-
-                    public function byid (Request $request){
-
-                        return response()->json([
-                            'status'=>'200',
-                            'message'=> 'guardado con exito',
-                        ]
-                            
-                        ); }
-                
-
-
-}
-
-
-
