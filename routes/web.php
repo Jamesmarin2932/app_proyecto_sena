@@ -1,18 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Cuenta;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+Route::get('/importar-cuentas', function () {
+    $path = storage_path('app/puc.csv');
 
-Route::get('/', function () {
-    return view('welcome');
+    if (!file_exists($path)) {
+        return 'Archivo no encontrado.';
+    }
+
+    $handle = fopen($path, 'r');
+    fgetcsv($handle); // Saltar la cabecera
+
+    while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+        Cuenta::create([
+            'codigo' => $data[0],
+            'nombre' => $data[1],
+        ]);
+    }
+
+    fclose($handle);
+
+    return '✅ Cuentas importadas con éxito.';
 });
