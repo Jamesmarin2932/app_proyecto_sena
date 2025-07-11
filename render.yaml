@@ -20,23 +20,13 @@ services:
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        fromService:
-          type: psql
-          name: facturacion-db
+        value: dpg-d1lc1s6r433s73di8rj0-a.oregon-postgres.render.com
       - key: DB_PORT
         value: 5432
       - key: DB_DATABASE
-        fromService:
-          type: psql
-          name: nombre-de-tu-db
-          property: database
+        value: facturacion_zfai
       - key: DB_USERNAME
-        fromService:
-          type: psql
-          name: nombre-de-tu-db
-          property: user
+        value: facturacion_user
       - key: DB_PASSWORD
-        fromService:
-          type: psql
-          name: nombre-de-tu-db
-          property: password
+        value: 23Il8z4P2xp24MBrVBNAaF55jUyd4zgv
+
