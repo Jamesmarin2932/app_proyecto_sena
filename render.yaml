@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: laravel-backend
+    env: php
+    plan: free
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan key:generate
+      php artisan migrate --force
+      php artisan config:cache
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromService:
+          type: psql
+          name: facturacion-db
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        fromService:
+          type: psql
+          name: nombre-de-tu-db
+          property: database
+      - key: DB_USERNAME
+        fromService:
+          type: psql
+          name: nombre-de-tu-db
+          property: user
+      - key: DB_PASSWORD
+        fromService:
+          type: psql
+          name: nombre-de-tu-db
+          property: password
