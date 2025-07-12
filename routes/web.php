@@ -27,12 +27,25 @@ Route::get('/importar-cuentas', function () {
     return '✅ Cuentas importadas con éxito.';
 });
 
-Route::get('/crear-usuario', function () {
+Route::get('/crear-usuario-admin', function () {
+    if (User::where('usuario', 'admin')->exists()) {
+        return '⚠️ El usuario admin ya existe.';
+    }
+
+    // Verifica si el rol "admin" existe. Si no, lo crea
+    if (!Role::where('name', 'admin')->exists()) {
+        Role::create(['name' => 'admin']);
+    }
+
     $user = User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
-        'password' => Hash::make('password123'), // Cambia esto si quieres otra clave
+        'nombre_usuario' => 'Administrador',
+        'identificacion' => '123456789',
+        'usuario' => 'admin',
+        'password' => Hash::make('admin1234'),
     ]);
 
-    return '✅ Usuario creado: ' . $user->email;
+    $user->assignRole('admin');
+
+    return '✅ Usuario admin creado con éxito. Puedes iniciar sesión con: usuario=admin, contraseña=admin1234';
+
 });
