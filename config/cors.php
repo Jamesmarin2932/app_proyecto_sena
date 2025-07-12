@@ -19,7 +19,10 @@ return [
 
     'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 
-   'allowed_origins' => ['https://proyecto-sena-facturacion-fronted.vercel.app'],
+   'allowed_origins' => [
+    'https://proyecto-sena-facturacion-fronted.vercel.app',
+    'https://proyecto-sena-facturacion-fronted-kc1gfs812.vercel.app',
+],
 
     'allowed_origins_patterns' => [],
 
