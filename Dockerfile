@@ -1,30 +1,33 @@
 # Usa una imagen oficial de PHP con FPM
 FROM php:8.2-fpm
 
-# Instala dependencias del sistema y extensiones necesarias
+# Instala dependencias del sistema y extensiones necesarias para PostgreSQL y ZIP
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libzip-dev libpq-dev \
     && docker-php-ext-install pdo pdo_pgsql zip
 
-# Instala Composer
+# Instala Composer desde la imagen oficial
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Crea y configura el directorio de trabajo
+# Define el directorio de trabajo
 WORKDIR /var/www/html
 
-# Copia todos los archivos al contenedor
+# Copia los archivos del proyecto al contenedor
 COPY . .
 
-# Instala dependencias PHP
+# Instala las dependencias PHP de producción (sin las de desarrollo)
 RUN composer install --no-dev --optimize-autoloader
 
-# Genera clave de la app y cachea config y rutas
+# Elimina el archivo .env (Render usará variables de entorno inyectadas)
+RUN rm -f .env
+
+# Genera la clave de la aplicación y cachea configuración
 RUN php artisan key:generate \
     && php artisan config:cache \
     && php artisan route:cache
 
-# Exponer puerto para el servidor embebido
+# Expone el puerto 8000 para php artisan serve (opcional en Render)
 EXPOSE 8000
 
-# Comando por defecto al iniciar
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Comando por defecto: aplicar migraciones y servir la app
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
