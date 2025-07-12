@@ -1,32 +1,30 @@
-FROM php:8.2-cli
+# Usa una imagen oficial de PHP con FPM
+FROM php:8.2-fpm
 
-# Instala dependencias necesarias
+# Instala dependencias del sistema y extensiones necesarias
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpng-dev \
-    libjpeg-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip unzip git curl \
-    libpq-dev \
-    libzip-dev \
-    && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd zip
+    git curl zip unzip libzip-dev libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql zip
 
 # Instala Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Establece directorio de trabajo
-WORKDIR /var/www
+# Crea y configura el directorio de trabajo
+WORKDIR /var/www/html
 
-# Copia archivos del proyecto
+# Copia todos los archivos al contenedor
 COPY . .
 
-# Instala dependencias y prepara Laravel
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan key:generate \
-    && php artisan migrate --force \
+# Instala dependencias PHP
+RUN composer install --no-dev --optimize-autoloader
+
+# Genera clave de la app y cachea config y rutas
+RUN php artisan key:generate \
     && php artisan config:cache \
     && php artisan route:cache
 
-# Comando para iniciar Laravel en Render
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# Exponer puerto para el servidor embebido
+EXPOSE 8000
+
+# Comando por defecto al iniciar
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

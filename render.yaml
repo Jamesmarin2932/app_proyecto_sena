@@ -12,6 +12,8 @@ services:
         value: false
       - key: APP_KEY
         generateValue: true
+      - key: APP_URL
+        value: https://tu-backend-en-render.com
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -24,3 +26,6 @@ services:
         value: facturacion_user
       - key: DB_PASSWORD
         value: 23Il8z4P2xp24MBrVBNAaF55jUyd4zgv
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: https://proyecto-sena-facturacion-fronted.vercel.app
+    deployHook: "php artisan migrate --force"
