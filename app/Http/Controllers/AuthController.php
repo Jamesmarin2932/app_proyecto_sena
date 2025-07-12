@@ -12,31 +12,20 @@ class AuthController extends Controller
 {
     // Método para autenticar al usuario y devolver un token
     
-    public function login(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'usuario' => 'required|string',
-            'password' => 'required|string',
-        ]);
-    
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-    
-        $user = User::where('usuario', $request->usuario)->first();
-    
-        // 👇 Asegúrate de que esté así
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Credenciales incorrectas.'], 401);
-        }
-    
-        $token = $user->createToken('API Token')->plainTextToken;
-    
+   public function login(Request $request)
+{
+    $usuario = $request->input('usuario');
+    $password = $request->input('password');
+
+    // ✅ Usuario fijo para pruebas (NO requiere base de datos)
+    if ($usuario === 'admin' && $password === 'admin123') {
         return response()->json([
-            'message' => 'Inicio de sesión exitoso.',
-            'token' => $token,
-            'username' => $user->usuario,
+            'message' => 'Inicio de sesión exitoso (modo prueba).',
+            'token' => base64_encode('token-de-prueba'), // puedes usar Str::random(60) si deseas
+            'username' => $usuario,
         ]);
     }
-    
+
+    return response()->json(['message' => 'Credenciales inválidas'], 401);
+}
 }
