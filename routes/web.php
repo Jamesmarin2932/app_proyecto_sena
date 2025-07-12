@@ -5,6 +5,7 @@ use App\Models\Cuenta;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/importar-cuentas', function () {
     $path = storage_path('app/puc.csv');
@@ -48,4 +49,13 @@ Route::get('/crear-usuario-admin', function () {
     $user->assignRole('admin');
 
     return '✅ Usuario admin creado con éxito. Puedes iniciar sesión con: usuario=admin, contraseña=admin1234';
+});
+
+Route::get('/ejecutar-migraciones', function () {
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        return '✅ Migraciones ejecutadas correctamente.';
+    } catch (\Exception $e) {
+        return '❌ Error al ejecutar migraciones: ' . $e->getMessage();
+    }
 });
