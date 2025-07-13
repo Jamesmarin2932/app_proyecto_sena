@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: laravel-backend
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://tu-backend-en-render.com
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d1lc1s6r433s73di8rj0-a.oregon-postgres.render.com
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: facturacion_zfai
+      - key: DB_USERNAME
+        value: facturacion_user
+      - key: DB_PASSWORD
+        value: 23Il8z4P2xp24MBrVBNAaF55jUyd4zgv
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: https://proyecto-sena-facturacion-fronted.vercel.app
+    buildCommand: ""
+    startCommand: "php artisan serve --host=0.0.0.0 --port=8000"
+    deployHook: "php artisan key:generate && php artisan config:cache && php artisan route:cache && php artisan migrate --force"
