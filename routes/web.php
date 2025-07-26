@@ -58,4 +58,7 @@ Route::get('/ejecutar-migraciones', function () {
     } catch (\Exception $e) {
         return '❌ Error al ejecutar migraciones: ' . $e->getMessage();
     }
+
+
+    
 });

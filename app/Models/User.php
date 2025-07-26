@@ -23,11 +23,5 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // Mutador para encriptar la contraseña
-    public function setPasswordAttribute($value)
-    {
-        if (!empty($value)) {
-            $this->attributes['password'] = Hash::make($value);
-        }
-    }
+
 }

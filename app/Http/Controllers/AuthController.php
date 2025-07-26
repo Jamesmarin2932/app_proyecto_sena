@@ -2,30 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    // Método para autenticar al usuario y devolver un token
-    
-   public function login(Request $request)
-{
-    $usuario = $request->input('usuario');
-    $password = $request->input('password');
+    public function login(Request $request)
+    {
+        // 🐛 Log temporal para verificar los datos recibidos
+        Log::info('Datos recibidos en login:', $request->all());
 
-    // ✅ Usuario fijo para pruebas (NO requiere base de datos)
-    if ($usuario === 'admin' && $password === 'admin123') {
+        $validator = Validator::make($request->all(), [
+            'usuario' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Buscar usuario por el campo 'usuario'
+        $user = User::where('usuario', $request->usuario)->first();
+
+        // Log para ver si el usuario fue encontrado
+        if (!$user) {
+            Log::warning('Usuario no encontrado: ' . $request->usuario);
+            return response()->json(['message' => 'Usuario no encontrado'], 404);
+        }
+
+        // Verificar contraseña
+        if (!Hash::check($request->password, $user->password)) {
+            Log::warning('Contraseña inválida para usuario: ' . $request->usuario);
+            return response()->json(['message' => 'Contraseña incorrecta'], 401);
+        }
+
+        // Crear token con Sanctum
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        Log::info('Inicio de sesión exitoso para usuario: ' . $user->usuario);
+
         return response()->json([
-            'message' => 'Inicio de sesión exitoso (modo prueba).',
-            'token' => base64_encode('token-de-prueba'), // puedes usar Str::random(60) si deseas
-            'username' => $usuario,
+            'message' => 'Inicio de sesión exitoso.',
+            'token' => $token,
+            'username' => $user->usuario,
         ]);
     }
-
-    return response()->json(['message' => 'Credenciales inválidas'], 401);
-}
 }
