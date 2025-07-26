@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/importar-cuentas', function () {
     $path = storage_path('app/puc.csv');
@@ -61,4 +62,13 @@ Route::get('/ejecutar-migraciones', function () {
 
 
     
+});
+
+Route::get('/probar-db', function () {
+    try {
+        DB::connection()->getPdo();
+        return '✅ Laravel en producción se conectó a Supabase exitosamente.';
+    } catch (\Exception $e) {
+        return '❌ Error de conexión: ' . $e->getMessage();
+    }
 });
