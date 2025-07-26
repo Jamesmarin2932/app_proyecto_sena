@@ -10,10 +10,8 @@ WORKDIR /var/www/html
 
 COPY . .
 
-# ❌ Eliminar esta línea que sobrescribe variables de entorno
-# RUN cp .env.example .env
-
-RUN composer install --no-dev --optimize-autoloader --no-scripts && \
+RUN touch .env && \
+    composer install --no-dev --optimize-autoloader --no-scripts && \
     php artisan config:clear && \
     php artisan key:generate
 
