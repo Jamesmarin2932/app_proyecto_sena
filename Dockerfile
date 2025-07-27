@@ -8,12 +8,17 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# Copiar todos los archivos al contenedor
 COPY . .
 
-RUN touch .env && \
-    composer install --no-dev --optimize-autoloader --no-scripts && \
+# Copiar un archivo .env por defecto
+COPY .env.example .env
+
+# Instalar dependencias y preparar Laravel
+RUN composer install --no-dev --optimize-autoloader --no-scripts && \
     php artisan config:clear && \
-    php artisan key:generate
+    php artisan key:generate && \
+    php artisan storage:link
 
 EXPOSE 10000
 
