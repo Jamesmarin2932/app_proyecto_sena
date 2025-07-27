@@ -10,25 +10,31 @@ use Illuminate\Support\Facades\DB;
 
 
 Route::get('/importar-cuentas', function () {
-    $path = storage_path('app/puc.csv');
+    $file = public_path('archivos/puc.csv');
 
-    if (!file_exists($path)) {
-        return 'Archivo no encontrado.';
+    if (!file_exists($file)) {
+        return response('❌ Archivo no encontrado.', 404);
     }
 
-    $handle = fopen($path, 'r');
-    fgetcsv($handle); // Saltar la cabecera
+    $handle = fopen($file, 'r');
+    fgetcsv($handle); // Omitir encabezado
+
+    $importadas = 0;
 
     while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-        Cuenta::create([
-            'codigo' => $data[0],
-            'nombre' => $data[1],
-        ]);
+        // Verificar que no esté vacía la fila
+        if (isset($data[0]) && isset($data[1])) {
+            Cuenta::create([
+                'codigo' => $data[0],
+                'nombre' => $data[1],
+            ]);
+            $importadas++;
+        }
     }
 
     fclose($handle);
 
-    return '✅ Cuentas importadas con éxito.';
+    return "✅ Se importaron {$importadas} cuentas con éxito.";
 });
 
 Route::get('/crear-usuario-admin', function () {
