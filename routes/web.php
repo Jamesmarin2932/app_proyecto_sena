@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
+
 Route::get('/importar-cuentas', function () {
     $path = storage_path('app/puc.csv');
 
@@ -71,4 +72,12 @@ Route::get('/probar-db', function () {
     } catch (\Exception $e) {
         return '❌ Error de conexión: ' . $e->getMessage();
     }
+});
+
+
+Route::get('/', function () {
+    return response()->json([
+        'status' => 'online',
+        'message' => '✅ API funcionando correctamente en Render'
+    ]);
 });
