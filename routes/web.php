@@ -77,7 +77,7 @@ Route::get('/probar-db', function () {
 
 Route::get('/', function () {
     return response()->json([
-        'status' => 'online',
-        'message' => '✅ API funcionando correctamente en Render'
+        'status' => 'ok',
+        'message' => 'API Laravel funcionando en Render 🎉'
     ]);
 });
