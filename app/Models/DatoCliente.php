@@ -29,6 +29,7 @@ class DatoCliente extends Model
         'actividad_economica',
         'observaciones',
         'cuenta_gasto',
+        'empresa_id',
     ];
 
     // Relación con facturas (un cliente tiene muchas facturas)

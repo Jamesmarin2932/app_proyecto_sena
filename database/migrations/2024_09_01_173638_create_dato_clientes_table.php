@@ -40,9 +40,11 @@ return new class extends Migration
             $table->string('actividad_economica')->nullable();
             $table->string('observaciones')->nullable();
             $table->string('cuenta_gasto')->nullable(); // o el tipo que desees
+            $table->foreignId('empresa_id')->constrained()->onDelete('cascade');
 
 
             $table->timestamps();
+           
         });
     }
 
