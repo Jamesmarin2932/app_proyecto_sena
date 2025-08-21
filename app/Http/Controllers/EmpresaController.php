@@ -2,74 +2,69 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Empresa;
+use Illuminate\Http\Request;
 
 class EmpresaController extends Controller
 {
-    // Constructor sin middleware para que no pida autenticación
-    public function __construct()
-    {
-        // Middleware desactivado temporalmente
-        // $this->middleware('auth:sanctum');
-    }
-
-    // Listar todas las empresas
     public function index()
     {
-        return Empresa::all();
+        return response()->json(Empresa::all(), 200);
     }
 
-    // Guardar nueva empresa
     public function store(Request $request)
     {
-        // Validación básica
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'nit' => 'nullable|string|max:50',
-            'direccion' => 'nullable|string|max:255',
-            'telefono' => 'nullable|string|max:50',
-            'correo' => 'nullable|email|max:255',
+        $validated = $request->validate([
+            'nombre_razon_social' => 'required|string|max:255',
+            'nombre_comercial'    => 'nullable|string|max:255',
+            'nit'                 => 'nullable|string|max:50',
+            'direccion'           => 'nullable|string|max:255',
+            'ciudad'              => 'nullable|string|max:100',
+            'departamento'        => 'nullable|string|max:100',
+            'pais'                => 'nullable|string|max:100',
+            'actividad_economica' => 'nullable|string|max:255',
         ]);
 
-        // Crear empresa
-        $empresa = Empresa::create([
-            'nombre' => $request->nombre,
-            'nit' => $request->nit,
-            'direccion' => $request->direccion,
-            'telefono' => $request->telefono,
-            'correo' => $request->correo,
-        ]);
+        $empresa = Empresa::create($validated);
 
         return response()->json([
-            'message' => 'Empresa creada exitosamente',
+            'message' => 'Empresa creada correctamente',
             'data' => $empresa
         ], 201);
     }
 
-    // Mostrar una empresa por ID
-    public function show($id)
+    public function show(Empresa $empresa)
     {
-        $empresa = Empresa::findOrFail($id);
-        return $empresa;
+        return response()->json($empresa, 200);
     }
 
-    // Actualizar empresa
-    public function update(Request $request, $id)
+    public function update(Request $request, Empresa $empresa)
     {
-        $empresa = Empresa::findOrFail($id);
-        $empresa->update($request->all());
+        $validated = $request->validate([
+            'nombre_razon_social' => 'required|string|max:255',
+            'nombre_comercial'    => 'nullable|string|max:255',
+            'nit'                 => 'nullable|string|max:50',
+            'direccion'           => 'nullable|string|max:255',
+            'ciudad'              => 'nullable|string|max:100',
+            'departamento'        => 'nullable|string|max:100',
+            'pais'                => 'nullable|string|max:100',
+            'actividad_economica' => 'nullable|string|max:255',
+        ]);
+
+        $empresa->update($validated);
 
         return response()->json([
-            'message' => 'Empresa actualizada exitosamente',
+            'message' => 'Empresa actualizada correctamente',
             'data' => $empresa
-        ]);
+        ], 200);
     }
 
-    // Eliminar empresa
-    public function destroy($id)
+    public function destroy(Empresa $empresa)
     {
-        Empresa::findOrFail($id)->delete();
-        return response()->json(['message' => 'Empresa eliminada correctamente']);
+        $empresa->delete();
+
+        return response()->json([
+            'message' => 'Empresa eliminada correctamente'
+        ], 200);
     }
 }

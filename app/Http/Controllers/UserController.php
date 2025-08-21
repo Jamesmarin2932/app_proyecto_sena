@@ -13,38 +13,33 @@ class UserController extends Controller
      * Registrar un nuevo usuario
      */
     public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'nombre_usuario'   => 'required|string|max:255',
-            'identificacion'   => 'required|string|unique:users,identificacion',
-            'usuario'          => 'required|string|unique:users,usuario',
-            'password'         => 'required|string|min:4|confirmed',
-            'password_confirmation' => 'required|string|min:4',
-            'empresas'         => 'array', // IDs de empresas
-            'empresas.*'       => 'exists:empresas,id',
-        ]);
+{
+    $request->validate([
+        'nombre_usuario' => 'required|string|max:255',
+        'usuario' => 'required|string|max:255|unique:users,usuario',
+        'identificacion' => 'required|string|max:20|unique:users,identificacion',
+        'password' => 'required|string|min:6|confirmed',
+        'empresas' => 'required|array',
+        'empresas.*' => 'exists:empresas,id',
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+    $user = User::create([
+        'nombre_usuario' => $request->nombre_usuario,
+        'usuario' => $request->usuario,
+        'identificacion' => $request->identificacion,
+        'password' => $request->password,
+    ]);
 
-        $user = User::create([
-            'nombre_usuario' => $request->nombre_usuario,
-            'identificacion' => $request->identificacion,
-            'usuario'        => $request->usuario,
-            'password'       => Hash::make($request->password),
-        ]);
+    // Asociar empresas
+    $user->empresas()->sync($request->empresas);
 
-        // Asignar empresas
-        if ($request->has('empresas')) {
-            $user->empresas()->sync($request->empresas);
-        }
+    return response()->json([
+        'message' => 'Usuario creado exitosamente',
+        'user' => $user
+    ], 201);
+}
 
-        return response()->json([
-            'message' => 'Usuario registrado con éxito.',
-            'user' => $user->load('empresas')
-        ], 201);
-    }
+
 
     /**
      * Obtener todos los usuarios (incluyendo roles y empresas)
@@ -113,8 +108,9 @@ class UserController extends Controller
         $user->usuario        = $request->usuario ?? $user->usuario;
 
         if (!empty($request->password)) {
-            $user->password = Hash::make($request->password);
-        }
+    $user->password = $request->password; // el mutador lo hashea
+}
+
 
         $user->save();
 

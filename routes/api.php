@@ -25,15 +25,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // 👤 Usuarios
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/users/register', [UserController::class, 'register']);
+    Route::post('/users/register', [UserController::class, 'register'])
+        ->withoutMiddleware(['empresa.activa']); 
     Route::put('/users/update/{id}', [UserController::class, 'update']);
     Route::get('/usuarios', [UserController::class, 'index']);
     Route::get('/usuarios/{id}', [UserController::class, 'show']);
     Route::delete('/usuarios/{id}', [UserController::class, 'destroy']);
 });
 
+
 // 📦 Productos (Multiempresa)
 Route::middleware(['auth:sanctum', 'empresa.activa'])->group(function () {
+    // Productos
     Route::get('/dato_productos/getdata', [DatoProductoController::class, 'getdata']);
     Route::post('/dato_productos/save', [DatoProductoController::class, 'save']);
     Route::put('/dato_productos/update', [DatoProductoController::class, 'update']);
@@ -92,5 +95,11 @@ Route::middleware(['auth:sanctum', 'empresa.activa'])->group(function () {
 // 📌 Roles
 Route::get('/roles', [UserController::class, 'roles']);
 
-// 💼 Empresas
-Route::apiResource('empresas', EmpresaController::class);
+// 💼 Empresas - Protegidas solo por autenticación
+Route::middleware('auth:sanctum')->group(function () {
+    // CRUD completo para empresas
+    Route::apiResource('empresas', EmpresaController::class);
+
+    // Ruta explícita para obtener SOLO las empresas del usuario actual
+    Route::get('/mis-empresas', [EmpresaController::class, 'misEmpresas']);
+});

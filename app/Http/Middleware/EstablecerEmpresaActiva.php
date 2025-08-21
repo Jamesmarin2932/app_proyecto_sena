@@ -16,9 +16,14 @@ class EstablecerEmpresaActiva
 public function handle($request, Closure $next)
 {
     // Rutas que no requieren empresa
-    if ($request->is('api/login') || $request->is('api/seleccionar-empresa')) {
-        return $next($request);
-    }
+    if (
+    $request->is('api/login') || 
+    $request->is('api/seleccionar-empresa') ||
+    $request->is('api/empresas*') ||    // 👈 permite acceso a empresas
+    $request->is('api/mis-empresas')
+) {
+    return $next($request);
+}
 
     $empresaId = $request->header('empresa_id') ?? $request->empresa_id;
 
