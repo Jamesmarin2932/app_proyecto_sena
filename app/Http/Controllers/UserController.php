@@ -44,24 +44,38 @@ class UserController extends Controller
     /**
      * Obtener todos los usuarios (incluyendo roles y empresas)
      */
-    public function index()
-    {
-        $users = User::with(['roles', 'empresas'])->get();
+   public function index()
+{
+    try {
+        // ✅ SOLUCIÓN: Cargar solo la relación 'empresas' que SÍ existe
+        $users = User::with('empresas')->get();
+        
         return response()->json(['users' => $users], 200);
+        
+    } catch (\Exception $e) {
+        \Log::error('Error en UserController@index: ' . $e->getMessage());
+        return response()->json(['error' => 'Error interno del servidor'], 500);
     }
-
+}
     /**
      * Mostrar un usuario por ID
      */
-    public function show($id)
-    {
-        $user = User::with(['roles', 'empresas'])->find($id);
+   public function show($id)
+{
+    try {
+        $user = User::with('empresas')->find($id);
+        
         if (!$user) {
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
 
         return response()->json(['user' => $user], 200);
+        
+    } catch (\Exception $e) {
+        \Log::error('Error en UserController@show: ' . $e->getMessage());
+        return response()->json(['error' => 'Error interno del servidor'], 500);
     }
+}
 
     /**
      * Eliminar un usuario
