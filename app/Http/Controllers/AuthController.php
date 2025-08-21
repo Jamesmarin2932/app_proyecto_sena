@@ -10,43 +10,45 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+  // App\Http\Controllers\AuthController.php
+public function login(Request $request)
 {
-    Log::info('Datos recibidos en login:', $request->all());
-
-    $validator = Validator::make($request->all(), [
+    $request->validate([
         'usuario' => 'required|string',
         'password' => 'required|string',
     ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
     $user = User::where('usuario', $request->usuario)->first();
 
-    if (!$user) {
-        Log::warning('Usuario no encontrado: ' . $request->usuario);
-        return response()->json(['message' => 'Usuario no encontrado'], 404);
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return response()->json(['error' => 'Credenciales incorrectas'], 401);
     }
 
-    if (!Hash::check($request->password, $user->password)) {
-        Log::warning('Contraseña inválida para usuario: ' . $request->usuario);
-        return response()->json(['message' => 'Contraseña incorrecta'], 401);
+    // Cargar empresas del usuario
+    $empresas = $user->empresas;
+
+    if ($empresas->isEmpty()) {
+        return response()->json(['error' => 'Usuario no tiene empresas asignadas'], 403);
     }
 
     $token = $user->createToken('auth_token')->plainTextToken;
 
-    // 🔹 Obtener empresas asociadas
-    $empresas = $user->empresas()->get();
-
-    Log::info('Inicio de sesión exitoso para usuario: ' . $user->usuario);
-
-    return response()->json([
-        'message' => 'Inicio de sesión exitoso.',
-        'token' => $token,
-        'username' => $user->usuario,
-        'empresas' => $empresas, // 👈 Enviamos empresas al frontend
-    ]);
+    // ✅ Determinar redirección automáticamente
+    $empresaActiva = null;
+    $redirectTo = '/seleccionar-empresa';
+    
+    if ($empresas->count() === 1) {
+        // Solo una empresa - selección automática
+        $empresaActiva = $empresas->first();
+        $redirectTo = '/home';
     }
+    
+    return response()->json([
+        'token' => $token,
+        'user' => $user,
+        'empresas' => $empresas,
+        'redirect_to' => $redirectTo,
+        'empresa_activa' => $empresaActiva,
+    ], 200);
+}
 }
