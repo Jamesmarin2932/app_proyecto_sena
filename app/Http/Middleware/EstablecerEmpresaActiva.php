@@ -20,7 +20,8 @@ public function handle($request, Closure $next)
     $request->is('api/login') || 
     $request->is('api/seleccionar-empresa') ||
     $request->is('api/empresas*') ||    // 👈 permite acceso a empresas
-    $request->is('api/mis-empresas')
+    $request->is('api/mis-empresas')||
+    $request->is('sanctum/csrf-cookie') // ← Agrega esta línea
 ) {
     return $next($request);
 }

@@ -12,6 +12,7 @@ class Asiento extends Model
     protected $table = 'asientos';
 
     protected $fillable = [
+        'empresa_id',   // 👈 aquí
         'tercero_id',
         'cuenta',
         'fecha',
@@ -20,13 +21,23 @@ class Asiento extends Model
         'credito',
         'saldo',
         'consecutivo',
-        'tipo',       // Nuevo campo
-        'factura',    // Nuevo campo
+        'tipo',
+        'factura',
     ];
 
-    // Relación con el modelo de terceros (datoClientes)
     public function tercero()
     {
         return $this->belongsTo(DatoCliente::class, 'tercero_id');
     }
+
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class, 'empresa_id');
+    }
+
+    public function tipoConsecutivo()
+{
+    return $this->belongsTo(ConsecutivoAsiento::class, 'tipo', 'tipo_asiento')
+        ->where('empresa_id', $this->empresa_id);
+}
 }
