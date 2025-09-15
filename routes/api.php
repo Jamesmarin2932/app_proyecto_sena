@@ -92,6 +92,13 @@ Route::middleware(['auth:sanctum', 'empresa.activa'])->group(function () {
 
     // 📓 ASIENTOS CONTABLES - RUTAS CORREGIDAS
     Route::prefix('asientos')->group(function () {
+
+         // 👉 NUEVA: Obtener asientos por tipo + consecutivo
+    Route::get('/{tipo}/{consecutivo}', [AsientoController::class, 'getByConsecutivoTipo'])
+         ->where([
+             'tipo' => '[A-Z]+',
+             'consecutivo' => '[0-9]+'
+         ]);
         // CRUD básico
         Route::get('/', [AsientoController::class, 'index']);              // Listar todos los asientos
         Route::post('/save', [AsientoController::class, 'save']);          // Crear nuevo asiento
@@ -102,11 +109,17 @@ Route::middleware(['auth:sanctum', 'empresa.activa'])->group(function () {
         // Consecutivo - RUTA CORREGIDA (quitado el /asientos extra)
         Route::get('/ultimo-consecutivo/{tipo}', [AsientoController::class, 'ultimoConsecutivo'])
             ->where('tipo', '[A-Z]+');
+
+
+            
         
         // Operaciones por consecutivo
         Route::get('/consecutivo/{consecutivo}', [AsientoController::class, 'getByConsecutivo']);         // Obtener asientos por consecutivo
         Route::put('/consecutivo/{consecutivo}', [AsientoController::class, 'updateByConsecutivo']);      // Actualizar todos los asientos de un consecutivo
         Route::delete('/consecutivo/{consecutivo}', [AsientoController::class, 'deleteByConsecutivo']);   // Eliminar todos los asientos de un consecutivo
+   
+   
+
     });
 
     // 💼 CUENTAS CONTABLES

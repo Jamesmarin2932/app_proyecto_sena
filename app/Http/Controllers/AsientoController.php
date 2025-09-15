@@ -163,40 +163,31 @@ public function ultimoConsecutivo($tipo)
     /**
      * Obtener todos los asientos de un consecutivo
      */
-    public function getByConsecutivo($consecutivo, Request $request)
-    {
-        try {
-            $empresaId = $request->header('empresa_id');
-            $tipo      = $request->input('tipo');
+    public function getByConsecutivoTipo($tipo, $consecutivo, Request $request)
+{
+    try {
+        $empresaId = $request->header('empresa_id');
 
-            if (!$empresaId) {
-                $empresaId = auth()->user()->empresa_actual;
-            }
-
-            if (!$empresaId) {
-                return response()->json(['error' => 'No se ha definido empresa activa'], 422);
-            }
-
-            $query = Asiento::where('consecutivo', $consecutivo)
-                ->where('empresa_id', $empresaId);
-
-            if ($tipo) {
-                $query->where('tipo', $tipo);
-            }
-
-            $asientos = $query->with('tercero')
-                ->orderBy('id', 'asc')
-                ->get();
-
-            if ($asientos->isEmpty()) {
-                return response()->json(['error' => 'Asiento no encontrado'], 404);
-            }
-
-            return response()->json($asientos);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if (!$empresaId) {
+            return response()->json(['error' => 'No se ha definido empresa activa'], 422);
         }
+
+        $asientos = Asiento::with('tercero')
+            ->where('empresa_id', $empresaId)
+            ->where('tipo', $tipo)
+            ->where('consecutivo', $consecutivo)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        if ($asientos->isEmpty()) {
+            return response()->json(['error' => 'Asiento no encontrado'], 404);
+        }
+
+        return response()->json($asientos);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
     /**
      * Actualizar asiento individual
