@@ -90,37 +90,40 @@ Route::middleware(['auth:sanctum', 'empresa.activa'])->group(function () {
         Route::delete('/delete', [FacturaController::class, 'delete']);
     });
 
-    // 📓 ASIENTOS CONTABLES - RUTAS CORREGIDAS
-    Route::prefix('asientos')->group(function () {
+   // 📓 ASIENTOS CONTABLES - RUTAS CORREGIDAS
+Route::prefix('asientos')->group(function () {
 
-         // 👉 NUEVA: Obtener asientos por tipo + consecutivo
+    // 👉 NUEVA: Eliminar asientos por tipo + consecutivo
+    Route::delete('/{tipo}/{consecutivo}', [AsientoController::class, 'deleteByTipoConsecutivo'])
+        ->where([
+            'tipo' => '[A-Z]+',
+            'consecutivo' => '[0-9]+'
+        ]);
+
+    // 👉 Obtener asientos por tipo + consecutivo
     Route::get('/{tipo}/{consecutivo}', [AsientoController::class, 'getByConsecutivoTipo'])
-         ->where([
-             'tipo' => '[A-Z]+',
-             'consecutivo' => '[0-9]+'
-         ]);
-        // CRUD básico
-        Route::get('/', [AsientoController::class, 'index']);              // Listar todos los asientos
-        Route::post('/save', [AsientoController::class, 'save']);          // Crear nuevo asiento
-        Route::get('/{id}', [AsientoController::class, 'show']);           // Obtener asiento por ID
-        Route::put('/{id}', [AsientoController::class, 'update']);         // Actualizar asiento individual
-        Route::delete('/{id}', [AsientoController::class, 'destroy']);     // Eliminar asiento individual
+        ->where([
+            'tipo' => '[A-Z]+',
+            'consecutivo' => '[0-9]+'
+        ]);
 
-        // Consecutivo - RUTA CORREGIDA (quitado el /asientos extra)
-        Route::get('/ultimo-consecutivo/{tipo}', [AsientoController::class, 'ultimoConsecutivo'])
-            ->where('tipo', '[A-Z]+');
+    // CRUD básico
+    Route::get('/', [AsientoController::class, 'index']);              // Listar todos los asientos
+    Route::post('/save', [AsientoController::class, 'save']);          // Crear nuevo asiento
+    Route::get('/{id}', [AsientoController::class, 'show']);           // Obtener asiento por ID
+    Route::put('/{id}', [AsientoController::class, 'update']);         // Actualizar asiento individual
+    Route::delete('/{id}', [AsientoController::class, 'destroy']);     // Eliminar asiento individual
 
+    // Consecutivo
+    Route::get('/ultimo-consecutivo/{tipo}', [AsientoController::class, 'ultimoConsecutivo'])
+        ->where('tipo', '[A-Z]+');
 
-            
-        
-        // Operaciones por consecutivo
-        Route::get('/consecutivo/{consecutivo}', [AsientoController::class, 'getByConsecutivo']);         // Obtener asientos por consecutivo
-        Route::put('/consecutivo/{consecutivo}', [AsientoController::class, 'updateByConsecutivo']);      // Actualizar todos los asientos de un consecutivo
-        Route::delete('/consecutivo/{consecutivo}', [AsientoController::class, 'deleteByConsecutivo']);   // Eliminar todos los asientos de un consecutivo
-   
-   
+    // Operaciones por consecutivo
+    Route::get('/consecutivo/{consecutivo}', [AsientoController::class, 'getByConsecutivo']);         // Obtener asientos por consecutivo
+    Route::put('/consecutivo/{consecutivo}', [AsientoController::class, 'updateByConsecutivo']);      // Actualizar todos los asientos de un consecutivo
+    Route::delete('/consecutivo/{consecutivo}', [AsientoController::class, 'deleteByConsecutivo']);   // Eliminar todos los asientos de un consecutivo
+});
 
-    });
 
     // 💼 CUENTAS CONTABLES
     Route::prefix('cuentas')->group(function () {

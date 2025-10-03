@@ -10,6 +10,7 @@ use App\Models\ConsecutivoAsiento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;  
 
 class AsientoController extends Controller
 {
@@ -396,4 +397,71 @@ public function ultimoConsecutivo($tipo)
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function exportarPdf($tipo, $consecutivo, Request $request)
+{
+    $empresaId = $request->header('empresa_id');
+
+    if (!$empresaId) {
+        return response()->json(['error' => 'No se ha definido empresa activa'], 422);
+    }
+
+    // Obtener todos los asientos de ese consecutivo y tipo
+    $asientos = Asiento::with('tercero')
+        ->where('empresa_id', $empresaId)
+        ->where('tipo', $tipo)
+        ->where('consecutivo', $consecutivo)
+        ->orderBy('id', 'asc')
+        ->get();
+
+    if ($asientos->isEmpty()) {
+        return response()->json(['error' => 'Asiento no encontrado'], 404);
+    }
+
+    // Datos de la empresa (si tienes tabla empresas)
+    $empresa = auth()->user()->empresa; // Ajusta según tu relación
+
+    // Renderiza la vista PDF (crea una vista blade en resources/views/pdf/asiento.blade.php)
+    $pdf = Pdf::loadView('pdf.asiento', [
+        'empresa' => $empresa,
+        'asientos' => $asientos,
+        'tipo' => $tipo,
+        'consecutivo' => $consecutivo,
+        'fechaDescarga' => now()->format('d/m/Y H:i'),
+    ]);
+
+    $nombreArchivo = "Soporte_Asiento_{$tipo}_{$consecutivo}.pdf";
+
+    return $pdf->download($nombreArchivo);
+}
+
+/**
+ * Eliminar todos los asientos de un consecutivo según tipo
+ */
+public function deleteByTipoConsecutivo($tipo, $consecutivo, Request $request)
+{
+    try {
+        $empresaId = $request->header('empresa_id');
+
+        if (!$empresaId) {
+            return response()->json(['error' => 'No se ha definido empresa activa'], 422);
+        }
+
+        $deleted = Asiento::where('empresa_id', $empresaId)
+            ->where('tipo', $tipo)
+            ->where('consecutivo', $consecutivo)
+            ->delete();
+
+        if ($deleted) {
+            return response()->json(['message' => 'Asiento eliminado correctamente']);
+        }
+
+        return response()->json(['error' => 'Asiento no encontrado'], 404);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+
+
 }
