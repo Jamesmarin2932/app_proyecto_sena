@@ -40,21 +40,42 @@ class AsientoController extends Controller
     DB::beginTransaction();
 
     try {
-        $tipo = $validatedData['asientos'][0]['tipo'];
+        // Obtener tipo
+$tipo = $validatedData['asientos'][0]['tipo'];
 
-        // Bloquear fila de consecutivo para evitar duplicados
-        $consecutivoModel = ConsecutivoAsiento::where('empresa_id', $empresaId)
-            ->where('tipo_asiento', $tipo)
-            ->lockForUpdate()
-            ->first();
+// Revisar si el primer asiento tiene consecutivo manual
+$consecutivoManual = $validatedData['asientos'][0]['consecutivo'] ?? null;
 
-        if (!$consecutivoModel) {
-            $consecutivoModel = ConsecutivoAsiento::create([
-                'empresa_id' => $empresaId,
-                'tipo_asiento' => $tipo,
-                'ultimo_consecutivo' => 0,
-            ]);
-        }
+// Bloquear fila de consecutivo para evitar duplicados
+$consecutivoModel = ConsecutivoAsiento::where('empresa_id', $empresaId)
+    ->where('tipo_asiento', $tipo)
+    ->lockForUpdate()
+    ->first();
+
+if (!$consecutivoModel) {
+    $consecutivoModel = ConsecutivoAsiento::create([
+        'empresa_id' => $empresaId,
+        'tipo_asiento' => $tipo,
+        'ultimo_consecutivo' => 0,
+    ]);
+}
+
+if ($consecutivoManual) {
+    // Si el consecutivo manual es mayor al registrado, actualizamos el contador
+    if ($consecutivoManual > $consecutivoModel->ultimo_consecutivo) {
+        $consecutivoModel->ultimo_consecutivo = $consecutivoManual;
+        $consecutivoModel->save();
+    }
+
+    $numeroConsecutivo = $consecutivoManual;
+} else {
+    // Si no hay consecutivo manual, usar el automático
+    $consecutivoModel->ultimo_consecutivo++;
+    $consecutivoModel->save();
+
+    $numeroConsecutivo = $consecutivoModel->ultimo_consecutivo;
+}
+
 
         // Incrementar consecutivo
         $consecutivoModel->ultimo_consecutivo++;
