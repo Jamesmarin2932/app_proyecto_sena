@@ -10,7 +10,8 @@ return [
 
     // Dominios permitidos (frontend)
     'allowed_origins' => [
-        'https://proyecto-sena-facturacion-fronted.vercel.app',
+        'https://proyecto-sena-facturacion-fronted.vercel.app', // producción
+        'https://proyecto-sena-facturacion-fron-git-41bf46-james-marins-projects.vercel.app', // preview
         'http://localhost:5173', // desarrollo local
     ],
 
@@ -25,6 +26,4 @@ return [
 
     // Permitir cookies y autenticación
     'supports_credentials' => true,
-
 ];
-
