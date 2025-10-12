@@ -2,23 +2,28 @@
 
 return [
 
+    // Rutas que aceptan CORS
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    // Métodos permitidos
+    'allowed_methods' => ['*'],
 
+    // Dominios permitidos (frontend)
     'allowed_origins' => [
         'https://proyecto-sena-facturacion-fronted.vercel.app',
-        'http://localhost:5173',
+        'http://localhost:5173', // desarrollo local
     ],
 
-    'allowed_origins_patterns' => ['/^https:\/\/.*\.vercel\.app$/'],
-
+    // Headers permitidos
     'allowed_headers' => ['*'],
 
+    // Headers expuestos (opcional)
     'exposed_headers' => [],
 
+    // Tiempo de cache de preflight
     'max_age' => 0,
 
+    // Permitir cookies y autenticación
     'supports_credentials' => true,
 
 ];

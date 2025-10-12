@@ -17,10 +17,17 @@ class DatabaseSeeder extends Seeder
         // 2. Tablas de relaciones principales (empresas, usuarios)
         // 3. Seeders complementarios (consecutivos, parámetros, etc.)
 
-        $this->call([
-            EmpresaSeeder::class,
-            UserSeeder::class,
-            ConsecutivosAsientoSeeder::class, // Seeder adicional que ya tienes
-        ]);
+       $this->call([
+    // 🌱 Seeders base
+    GlobalCuentasSeeder::class,      // <- NUEVO, primero para que las cuentas existan
+
+    // 🌱 Tablas principales
+    EmpresaSeeder::class,
+    UserSeeder::class,
+
+    // 🌱 Seeders complementarios
+    ConsecutivosAsientoSeeder::class,
+]);
+
     }
 }
