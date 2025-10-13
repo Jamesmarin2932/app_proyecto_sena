@@ -23,6 +23,7 @@ class Asiento extends Model
         'consecutivo',
         'tipo',
         'factura',
+        'usuario_creador',
     ];
 
     public function tercero()

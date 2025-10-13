@@ -17,112 +17,116 @@ class AsientoController extends Controller
     /**
      * Guardar nuevo asiento contable
      */
-  public function save(Request $request)
-{
-    $empresaId = $request->header('empresa_id');
+    public function save(Request $request)
+    {
+        $empresaId = $request->header('empresa_id');
 
-    if (!$empresaId) {
-        return response()->json(['error' => 'No se ha definido empresa activa'], 422);
-    }
-
-    $validatedData = $request->validate([
-        'asientos' => 'required|array',
-        'asientos.*.tipo'       => 'required|string|in:CC,RC,NC,CE',
-        'asientos.*.fecha'      => 'required|date',
-        'asientos.*.factura'    => 'nullable|string',
-        'asientos.*.tercero_id' => 'nullable|integer|exists:dato_clientes,id',
-        'asientos.*.cuenta'     => 'required|string',
-        'asientos.*.concepto'   => 'required|string',
-        'asientos.*.debito'     => 'required|numeric|min:0',
-        'asientos.*.credito'    => 'required|numeric|min:0',
-    ]);
-
-    DB::beginTransaction();
-
-    try {
-        // Obtener tipo
-$tipo = $validatedData['asientos'][0]['tipo'];
-
-// Revisar si el primer asiento tiene consecutivo manual
-$consecutivoManual = $validatedData['asientos'][0]['consecutivo'] ?? null;
-
-// Bloquear fila de consecutivo para evitar duplicados
-$consecutivoModel = ConsecutivoAsiento::where('empresa_id', $empresaId)
-    ->where('tipo_asiento', $tipo)
-    ->lockForUpdate()
-    ->first();
-
-if (!$consecutivoModel) {
-    $consecutivoModel = ConsecutivoAsiento::create([
-        'empresa_id' => $empresaId,
-        'tipo_asiento' => $tipo,
-        'ultimo_consecutivo' => 0,
-    ]);
-}
-
-if ($consecutivoManual) {
-    // Si el consecutivo manual es mayor al registrado, actualizamos el contador
-    if ($consecutivoManual > $consecutivoModel->ultimo_consecutivo) {
-        $consecutivoModel->ultimo_consecutivo = $consecutivoManual;
-        $consecutivoModel->save();
-    }
-
-    $numeroConsecutivo = $consecutivoManual;
-} else {
-    // Si no hay consecutivo manual, usar el automático
-    $consecutivoModel->ultimo_consecutivo++;
-    $consecutivoModel->save();
-
-    $numeroConsecutivo = $consecutivoModel->ultimo_consecutivo;
-}
-
-
-        // Incrementar consecutivo
-        $consecutivoModel->ultimo_consecutivo++;
-        $consecutivoModel->save();
-
-        $numeroConsecutivo = $consecutivoModel->ultimo_consecutivo;
-        $asientosGuardados = [];
-
-        foreach ($validatedData['asientos'] as $datos) {
-            $datos['consecutivo'] = $numeroConsecutivo;
-            $datos['empresa_id']  = $empresaId;
-            $datos['saldo']       = $datos['debito'] - $datos['credito'];
-
-            // Crear cuentas
-            $cuentaGlobal = Cuenta::firstOrCreate(
-                ['codigo' => $datos['cuenta']],
-                ['nombre' => 'Cuenta sin nombre']
-            );
-
-            CuentaEmpresa::firstOrCreate(
-                [
-                    'empresa_id' => $empresaId,
-                    'codigo'     => $datos['cuenta'],
-                ],
-                ['nombre' => $cuentaGlobal->nombre]
-            );
-
-            $asientosGuardados[] = Asiento::create($datos);
+        if (!$empresaId) {
+            return response()->json(['error' => 'No se ha definido empresa activa'], 422);
         }
 
-        DB::commit();
-
-        return response()->json([
-            'message'     => 'Asientos guardados correctamente',
-            'consecutivo' => $numeroConsecutivo,
-            'asientos'    => $asientosGuardados
+        $validatedData = $request->validate([
+            'asientos' => 'required|array',
+            'asientos.*.tipo'       => 'required|string|in:CC,RC,NC,CE',
+            'asientos.*.fecha'      => 'required|date',
+            'asientos.*.factura'    => 'nullable|string',
+            'asientos.*.tercero_id' => 'nullable|integer|exists:dato_clientes,id',
+            'asientos.*.cuenta'     => 'required|string',
+            'asientos.*.concepto'   => 'required|string',
+            'asientos.*.debito'     => 'required|numeric|min:0',
+            'asientos.*.credito'    => 'required|numeric|min:0',
+            'asientos.*.usuario_creador' => 'nullable|string', // 🔹 NUEVO CAMPO
         ]);
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'error'   => 'Error al guardar asientos',
-            'detalle' => $e->getMessage(),
-        ], 500);
-    }
-}
+        DB::beginTransaction();
 
+        try {
+            // Obtener tipo de asiento
+            $tipo = $validatedData['asientos'][0]['tipo'];
+
+            // Revisar si el primer asiento tiene consecutivo manual
+            $consecutivoManual = $validatedData['asientos'][0]['consecutivo'] ?? null;
+
+            // Bloquear fila de consecutivo para evitar duplicados
+            $consecutivoModel = ConsecutivoAsiento::where('empresa_id', $empresaId)
+                ->where('tipo_asiento', $tipo)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$consecutivoModel) {
+                $consecutivoModel = ConsecutivoAsiento::create([
+                    'empresa_id' => $empresaId,
+                    'tipo_asiento' => $tipo,
+                    'ultimo_consecutivo' => 0,
+                ]);
+            }
+
+            if ($consecutivoManual) {
+                // Si el consecutivo manual es mayor al registrado, actualizamos el contador
+                if ($consecutivoManual > $consecutivoModel->ultimo_consecutivo) {
+                    $consecutivoModel->ultimo_consecutivo = $consecutivoManual;
+                    $consecutivoModel->save();
+                }
+
+                $numeroConsecutivo = $consecutivoManual;
+            } else {
+                // Si no hay consecutivo manual, usar el automático solo una vez
+                $consecutivoModel->ultimo_consecutivo++;
+                $consecutivoModel->save();
+
+                $numeroConsecutivo = $consecutivoModel->ultimo_consecutivo;
+            }
+
+            $asientosGuardados = [];
+
+            foreach ($validatedData['asientos'] as $datos) {
+                $datos['consecutivo'] = $numeroConsecutivo;
+                $datos['empresa_id']  = $empresaId;
+                $datos['saldo']       = $datos['debito'] - $datos['credito'];
+                
+                // 🔹 ASIGNAR USUARIO CREADOR SI NO VIENE EN EL REQUEST
+                if (!isset($datos['usuario_creador']) || empty($datos['usuario_creador'])) {
+                    // Puedes obtener el usuario actual de alguna de estas formas:
+                    // Opción 1: Del usuario autenticado
+                    $datos['usuario_creador'] = auth()->user()->nombre_usuario ?? 'Usuario Sistema';
+                    
+                    // Opción 2: Del request si viene en el header
+                    // $datos['usuario_creador'] = $request->header('user_nombre', 'Usuario Sistema');
+                }
+
+                // Crear cuentas globales y por empresa si no existen
+                $cuentaGlobal = Cuenta::firstOrCreate(
+                    ['codigo' => $datos['cuenta']],
+                    ['nombre' => 'Cuenta sin nombre']
+                );
+
+                CuentaEmpresa::firstOrCreate(
+                    [
+                        'empresa_id' => $empresaId,
+                        'codigo'     => $datos['cuenta'],
+                    ],
+                    ['nombre' => $cuentaGlobal->nombre]
+                );
+
+                $asientosGuardados[] = Asiento::create($datos);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message'     => 'Asientos guardados correctamente',
+                'consecutivo' => $numeroConsecutivo,
+                'asientos'    => $asientosGuardados
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error'   => 'Error al guardar asientos',
+                'detalle' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     /**
      * Listar todos los asientos de la empresa
@@ -143,31 +147,29 @@ if ($consecutivoManual) {
     /**
      * Obtener último consecutivo por tipo
      */
-public function ultimoConsecutivo($tipo)
-{
-    $empresaId = request()->header('empresa_id');
+    public function ultimoConsecutivo($tipo)
+    {
+        $empresaId = request()->header('empresa_id');
 
-    if (!$empresaId) {
-        return response()->json(['error' => 'No se ha definido empresa activa'], 422);
+        if (!$empresaId) {
+            return response()->json(['error' => 'No se ha definido empresa activa'], 422);
+        }
+
+        // Buscar o crear consecutivo
+        $consecutivoModel = ConsecutivoAsiento::firstOrCreate(
+            [
+                'empresa_id' => $empresaId,
+                'tipo_asiento' => $tipo
+            ],
+            [
+                'ultimo_consecutivo' => 0
+            ]
+        );
+
+        return response()->json([
+            'consecutivo' => $consecutivoModel->ultimo_consecutivo
+        ]);
     }
-
-    // Buscar o crear consecutivo
-    $consecutivoModel = ConsecutivoAsiento::firstOrCreate(
-        [
-            'empresa_id' => $empresaId,
-            'tipo_asiento' => $tipo
-        ],
-        [
-            'ultimo_consecutivo' => 0
-        ]
-    );
-
-    return response()->json([
-        'consecutivo' => $consecutivoModel->ultimo_consecutivo
-    ]);
-}
-
-
 
     /**
      * Obtener asientos por ID
@@ -186,30 +188,30 @@ public function ultimoConsecutivo($tipo)
      * Obtener todos los asientos de un consecutivo
      */
     public function getByConsecutivoTipo($tipo, $consecutivo, Request $request)
-{
-    try {
-        $empresaId = $request->header('empresa_id');
+    {
+        try {
+            $empresaId = $request->header('empresa_id');
 
-        if (!$empresaId) {
-            return response()->json(['error' => 'No se ha definido empresa activa'], 422);
+            if (!$empresaId) {
+                return response()->json(['error' => 'No se ha definido empresa activa'], 422);
+            }
+
+            $asientos = Asiento::with('tercero')
+                ->where('empresa_id', $empresaId)
+                ->where('tipo', $tipo)
+                ->where('consecutivo', $consecutivo)
+                ->orderBy('id', 'asc')
+                ->get();
+
+            if ($asientos->isEmpty()) {
+                return response()->json(['error' => 'Asiento no encontrado'], 404);
+            }
+
+            return response()->json($asientos);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        $asientos = Asiento::with('tercero')
-            ->where('empresa_id', $empresaId)
-            ->where('tipo', $tipo)
-            ->where('consecutivo', $consecutivo)
-            ->orderBy('id', 'asc')
-            ->get();
-
-        if ($asientos->isEmpty()) {
-            return response()->json(['error' => 'Asiento no encontrado'], 404);
-        }
-
-        return response()->json($asientos);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
     }
-}
 
     /**
      * Actualizar asiento individual
@@ -232,6 +234,7 @@ public function ultimoConsecutivo($tipo)
                 'concepto'   => 'required|string',
                 'debito'     => 'required|numeric|min:0',
                 'credito'    => 'required|numeric|min:0',
+                'usuario_creador' => 'nullable|string', // 🔹 NUEVO CAMPO
             ]);
 
             DB::beginTransaction();
@@ -271,82 +274,88 @@ public function ultimoConsecutivo($tipo)
     /**
      * Actualizar asiento completo por consecutivo
      */
-   public function updateByConsecutivo(Request $request, $consecutivo)
-{
-    $empresaId = $request->header('empresa_id');
+    public function updateByConsecutivo(Request $request, $consecutivo)
+    {
+        $empresaId = $request->header('empresa_id');
 
-    $validator = Validator::make($request->all(), [
-        'asientos' => 'required|array',
-        'asientos.*.tipo'       => 'required|string|in:CC,RC,NC,CE',
-        'asientos.*.fecha'      => 'required|date',
-        'asientos.*.factura'    => 'nullable|string',
-        'asientos.*.tercero_id' => 'nullable|integer|exists:dato_clientes,id',
-        'asientos.*.cuenta'     => 'required|string',
-        'asientos.*.concepto'   => 'required|string',
-        'asientos.*.debito'     => 'required|numeric|min:0',
-        'asientos.*.credito'    => 'required|numeric|min:0',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['error' => $validator->errors()], 422);
-    }
-
-    DB::beginTransaction();
-
-    try {
-        // Obtener asientos existentes
-        $existing = Asiento::where('consecutivo', $consecutivo)
-            ->where('empresa_id', $empresaId)
-            ->get();
-
-        if ($existing->isEmpty()) {
-            return response()->json(['error' => 'Asiento no encontrado'], 404);
-        }
-
-        // Borrar asientos antiguos del mismo consecutivo
-        Asiento::where('consecutivo', $consecutivo)
-            ->where('empresa_id', $empresaId)
-            ->delete();
-
-        $nuevos = [];
-        foreach ($request->asientos as $data) {
-            $cuentaGlobal = Cuenta::firstOrCreate(
-                ['codigo' => $data['cuenta']],
-                ['nombre' => 'Cuenta sin nombre']
-            );
-
-            CuentaEmpresa::firstOrCreate(
-                [
-                    'empresa_id' => $empresaId,
-                    'codigo'     => $data['cuenta'],
-                ],
-                [
-                    'nombre' => $cuentaGlobal->nombre,
-                ]
-            );
-
-            $data['empresa_id']  = $empresaId;
-            $data['consecutivo'] = $consecutivo; // Mantener el mismo consecutivo
-            $data['saldo']       = $data['debito'] - $data['credito'];
-
-            $nuevos[] = Asiento::create($data);
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'message'  => 'Asiento actualizado correctamente',
-            'asientos' => $nuevos
+        $validator = Validator::make($request->all(), [
+            'asientos' => 'required|array',
+            'asientos.*.tipo'       => 'required|string|in:CC,RC,NC,CE',
+            'asientos.*.fecha'      => 'required|date',
+            'asientos.*.factura'    => 'nullable|string',
+            'asientos.*.tercero_id' => 'nullable|integer|exists:dato_clientes,id',
+            'asientos.*.cuenta'     => 'required|string',
+            'asientos.*.concepto'   => 'required|string',
+            'asientos.*.debito'     => 'required|numeric|min:0',
+            'asientos.*.credito'    => 'required|numeric|min:0',
+            'asientos.*.usuario_creador' => 'nullable|string', // 🔹 NUEVO CAMPO
         ]);
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'error'   => 'Error al actualizar asiento',
-            'detalle' => $e->getMessage()
-        ], 500);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Obtener asientos existentes
+            $existing = Asiento::where('consecutivo', $consecutivo)
+                ->where('empresa_id', $empresaId)
+                ->get();
+
+            if ($existing->isEmpty()) {
+                return response()->json(['error' => 'Asiento no encontrado'], 404);
+            }
+
+            // Borrar asientos antiguos del mismo consecutivo
+            Asiento::where('consecutivo', $consecutivo)
+                ->where('empresa_id', $empresaId)
+                ->delete();
+
+            $nuevos = [];
+            foreach ($request->asientos as $data) {
+                $cuentaGlobal = Cuenta::firstOrCreate(
+                    ['codigo' => $data['cuenta']],
+                    ['nombre' => 'Cuenta sin nombre']
+                );
+
+                CuentaEmpresa::firstOrCreate(
+                    [
+                        'empresa_id' => $empresaId,
+                        'codigo'     => $data['cuenta'],
+                    ],
+                    [
+                        'nombre' => $cuentaGlobal->nombre,
+                    ]
+                );
+
+                $data['empresa_id']  = $empresaId;
+                $data['consecutivo'] = $consecutivo; // Mantener el mismo consecutivo
+                $data['saldo']       = $data['debito'] - $data['credito'];
+                
+                // 🔹 ASIGNAR USUARIO CREADOR SI NO VIENE EN EL REQUEST
+                if (!isset($data['usuario_creador']) || empty($data['usuario_creador'])) {
+                    $data['usuario_creador'] = auth()->user()->nombre_usuario ?? 'Usuario Sistema';
+                }
+
+                $nuevos[] = Asiento::create($data);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message'  => 'Asiento actualizado correctamente',
+                'asientos' => $nuevos
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error'   => 'Error al actualizar asiento',
+                'detalle' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     /**
      * Eliminar asiento individual
@@ -420,69 +429,66 @@ public function ultimoConsecutivo($tipo)
     }
 
     public function exportarPdf($tipo, $consecutivo, Request $request)
-{
-    $empresaId = $request->header('empresa_id');
-
-    if (!$empresaId) {
-        return response()->json(['error' => 'No se ha definido empresa activa'], 422);
-    }
-
-    // Obtener todos los asientos de ese consecutivo y tipo
-    $asientos = Asiento::with('tercero')
-        ->where('empresa_id', $empresaId)
-        ->where('tipo', $tipo)
-        ->where('consecutivo', $consecutivo)
-        ->orderBy('id', 'asc')
-        ->get();
-
-    if ($asientos->isEmpty()) {
-        return response()->json(['error' => 'Asiento no encontrado'], 404);
-    }
-
-    // Datos de la empresa (si tienes tabla empresas)
-    $empresa = auth()->user()->empresa; // Ajusta según tu relación
-
-    // Renderiza la vista PDF (crea una vista blade en resources/views/pdf/asiento.blade.php)
-    $pdf = Pdf::loadView('pdf.asiento', [
-        'empresa' => $empresa,
-        'asientos' => $asientos,
-        'tipo' => $tipo,
-        'consecutivo' => $consecutivo,
-        'fechaDescarga' => now()->format('d/m/Y H:i'),
-    ]);
-
-    $nombreArchivo = "Soporte_Asiento_{$tipo}_{$consecutivo}.pdf";
-
-    return $pdf->download($nombreArchivo);
-}
-
-/**
- * Eliminar todos los asientos de un consecutivo según tipo
- */
-public function deleteByTipoConsecutivo($tipo, $consecutivo, Request $request)
-{
-    try {
+    {
         $empresaId = $request->header('empresa_id');
 
         if (!$empresaId) {
             return response()->json(['error' => 'No se ha definido empresa activa'], 422);
         }
 
-        $deleted = Asiento::where('empresa_id', $empresaId)
+        // Obtener todos los asientos de ese consecutivo y tipo
+        $asientos = Asiento::with('tercero')
+            ->where('empresa_id', $empresaId)
             ->where('tipo', $tipo)
             ->where('consecutivo', $consecutivo)
-            ->delete();
+            ->orderBy('id', 'asc')
+            ->get();
 
-        if ($deleted) {
-            return response()->json(['message' => 'Asiento eliminado correctamente']);
+        if ($asientos->isEmpty()) {
+            return response()->json(['error' => 'Asiento no encontrado'], 404);
         }
 
-        return response()->json(['error' => 'Asiento no encontrado'], 404);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+        // Datos de la empresa (si tienes tabla empresas)
+        $empresa = auth()->user()->empresa; // Ajusta según tu relación
+
+        // Renderiza la vista PDF (crea una vista blade en resources/views/pdf/asiento.blade.php)
+        $pdf = Pdf::loadView('pdf.asiento', [
+            'empresa' => $empresa,
+            'asientos' => $asientos,
+            'tipo' => $tipo,
+            'consecutivo' => $consecutivo,
+            'fechaDescarga' => now()->format('d/m/Y H:i'),
+        ]);
+
+        $nombreArchivo = "Soporte_Asiento_{$tipo}_{$consecutivo}.pdf";
+
+        return $pdf->download($nombreArchivo);
     }
-}
 
+    /**
+     * Eliminar todos los asientos de un consecutivo según tipo
+     */
+    public function deleteByTipoConsecutivo($tipo, $consecutivo, Request $request)
+    {
+        try {
+            $empresaId = $request->header('empresa_id');
 
+            if (!$empresaId) {
+                return response()->json(['error' => 'No se ha definido empresa activa'], 422);
+            }
 
+            $deleted = Asiento::where('empresa_id', $empresaId)
+                ->where('tipo', $tipo)
+                ->where('consecutivo', $consecutivo)
+                ->delete();
+
+            if ($deleted) {
+                return response()->json(['message' => 'Asiento eliminado correctamente']);
+            }
+
+            return response()->json(['error' => 'Asiento no encontrado'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

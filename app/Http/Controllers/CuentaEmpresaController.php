@@ -15,38 +15,40 @@ class CuentaEmpresaController extends Controller
     }
 
     // ✅ Obtener todas las cuentas (globales + de la empresa)
-   public function todas($empresaId)
+public function todas($empresaId)
 {
-    // Cuentas globales
     $globales = \App\Models\Cuenta::select('id', 'codigo', 'nombre')
         ->orderBy('codigo')
         ->get()
         ->map(function ($c) {
             return [
-                'id' => $c->id,          // ID real
+                'id' => $c->id,
                 'codigo' => $c->codigo,
-                'nombre' => $c->nombre,
-                'origen' => 'global'     // 👈 indicador de origen
+                'nombre' => $c->nombre ?: 'Sin nombre', // fallback opcional
+                'origen' => 'global'
             ];
         });
 
-    // Cuentas de la empresa
     $locales = \App\Models\CuentaEmpresa::where('empresa_id', $empresaId)
         ->select('id', 'codigo', 'nombre')
         ->orderBy('codigo')
         ->get()
         ->map(function ($c) {
             return [
-                'id' => $c->id,          // ID real
+                'id' => $c->id,
                 'codigo' => $c->codigo,
                 'nombre' => $c->nombre,
-                'origen' => 'empresa'    // 👈 indicador de origen
+                'origen' => 'empresa'
             ];
         });
 
-    // Unir ambas colecciones
-    return response()->json($globales->merge($locales));
+    // 🔹 Priorizar cuentas de la empresa y evitar duplicados por código
+    $merged = $globales->keyBy('codigo')->merge($locales->keyBy('codigo'))->values();
+
+    return response()->json($merged);
 }
+
+
     // ✅ Crear cuenta para empresa
     public function store(Request $request, $empresaId)
     {
