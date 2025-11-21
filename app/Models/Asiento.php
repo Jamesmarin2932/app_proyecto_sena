@@ -2,43 +2,47 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Asiento extends Model
 {
-    use HasFactory;
-
-    protected $table = 'asientos';
-
     protected $fillable = [
-        'empresa_id',   // 👈 aquí
+        'empresa_id',
+        'tipo',
+        'fecha',
+        'factura',
         'tercero_id',
         'cuenta',
-        'fecha',
         'concepto',
         'debito',
         'credito',
         'saldo',
         'consecutivo',
-        'tipo',
-        'factura',
         'usuario_creador',
     ];
 
+    // Relación con cliente/tercero
     public function tercero()
     {
         return $this->belongsTo(DatoCliente::class, 'tercero_id');
     }
 
-    public function empresa()
+    // Relación con Cuenta global
+    public function cuentaInfo()
     {
-        return $this->belongsTo(Empresa::class, 'empresa_id');
+        return $this->belongsTo(Cuenta::class, 'cuenta', 'codigo');
     }
 
-    public function tipoConsecutivo()
-{
-    return $this->belongsTo(ConsecutivoAsiento::class, 'tipo', 'tipo_asiento')
-        ->where('empresa_id', $this->empresa_id);
-}
+    // Relación con Cuenta por empresa
+    public function cuentaEmpresa()
+    {
+        return $this->belongsTo(CuentaEmpresa::class, 'cuenta', 'codigo')
+            ->where('empresa_id', $this->empresa_id);
+    }
+
+    // Accesor para obtener siempre el nombre de cuenta correcto
+    public function getNombreCuentaAttribute()
+    {
+        return $this->cuentaEmpresa->nombre ?? $this->cuentaInfo->nombre ?? $this->cuenta;
+    }
 }
